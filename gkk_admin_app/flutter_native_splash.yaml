@@ -1,0 +1,26 @@
+flutter_native_splash:
+  # App icon as splash image
+  image: assets/images/app_icon.png
+  
+  # Brand colors - Cream background
+  color: "#FAF6ED"
+  
+  # Branding color (green accent)
+  color_dark: "#FAF6ED"
+  
+  # Image settings
+  image_dark: assets/images/app_icon.png
+  
+  # Android 12+ specific settings
+  android_12:
+    image: assets/images/app_icon.png
+    color: "#FAF6ED"
+    icon_background_color: "#2da832"
+    
+  # Fullscreen mode
+  fullscreen: true
+  
+  # Platform settings
+  android: true
+  ios: false
+  web: false
