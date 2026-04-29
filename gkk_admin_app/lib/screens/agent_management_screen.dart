@@ -40,7 +40,7 @@ class _AgentManagementScreenState extends State<AgentManagementScreen> {
         final agentId = ticket['agent_id'];
         if (agentId != null && !uniqueAgents.containsKey(agentId)) {
           var email = ticket['agent_email'];
-          
+
           // If no email in ticket, try to get from support_agents table
           if (email == null) {
             try {
@@ -54,12 +54,15 @@ class _AgentManagementScreenState extends State<AgentManagementScreen> {
               // Ignore errors
             }
           }
-          
-          final displayEmail = email ?? 'ID: ${agentId.toString().substring(0, 8)}...';
+
+          final displayEmail =
+              email ?? 'ID: ${agentId.toString().substring(0, 8)}...';
           uniqueAgents[agentId] = {
             'id': agentId,
             'email': displayEmail,
-            'name': email?.split('@').first ?? 'Agent ${agentId.toString().substring(0, 6)}',
+            'name':
+                email?.split('@').first ??
+                'Agent ${agentId.toString().substring(0, 6)}',
           };
         }
       }
@@ -73,7 +76,8 @@ class _AgentManagementScreenState extends State<AgentManagementScreen> {
               .eq('id', agentId)
               .maybeSingle();
           if (agentData != null) {
-            uniqueAgents[agentId]!['is_banned'] = agentData['is_banned'] ?? false;
+            uniqueAgents[agentId]!['is_banned'] =
+                agentData['is_banned'] ?? false;
           } else {
             uniqueAgents[agentId]!['is_banned'] = false;
           }
@@ -99,7 +103,10 @@ class _AgentManagementScreenState extends State<AgentManagementScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FD),
       appBar: AppBar(
-        title: Text('Agent Management', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold)),
+        title: Text(
+          'Agent Management',
+          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,
@@ -116,30 +123,35 @@ class _AgentManagementScreenState extends State<AgentManagementScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _agents.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.people_outline, size: 64, color: Colors.grey[400]),
-                      const SizedBox(height: 16),
-                      Text('No agents have handled tickets yet', style: TextStyle(color: Colors.grey[600])),
-                      const SizedBox(height: 8),
-                      Text('Agents will appear here after they claim tickets', 
-                           style: TextStyle(color: Colors.grey[400], fontSize: 12)),
-                    ],
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.people_outline, size: 64, color: Colors.grey[400]),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No agents have handled tickets yet',
+                    style: TextStyle(color: Colors.grey[600]),
                   ),
-                )
-              : RefreshIndicator(
-                  onRefresh: _loadAgents,
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: _agents.length,
-                    itemBuilder: (context, index) {
-                      final agent = _agents[index];
-                      return _buildAgentCard(agent);
-                    },
+                  const SizedBox(height: 8),
+                  Text(
+                    'Agents will appear here after they claim tickets',
+                    style: TextStyle(color: Colors.grey[400], fontSize: 12),
                   ),
-                ),
+                ],
+              ),
+            )
+          : RefreshIndicator(
+              onRefresh: _loadAgents,
+              child: ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: _agents.length,
+                itemBuilder: (context, index) {
+                  final agent = _agents[index];
+                  return _buildAgentCard(agent);
+                },
+              ),
+            ),
     );
   }
 
@@ -153,35 +165,58 @@ class _AgentManagementScreenState extends State<AgentManagementScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: isBanned ? Colors.red.shade200 : Colors.grey.shade200),
+        side: BorderSide(
+          color: isBanned ? Colors.red.shade200 : Colors.grey.shade200,
+        ),
       ),
       child: ListTile(
         onTap: () async {
           await Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => AgentDetailScreen(agent: agent, supportClient: _supportClient),
+              builder: (_) => AgentDetailScreen(
+                agent: agent,
+                supportClient: _supportClient,
+              ),
             ),
           );
           _loadAgents(); // Refresh after returning
         },
         leading: CircleAvatar(
-          backgroundColor: isBanned ? Colors.red.shade50 : const Color(0xFF2DA931).withOpacity(0.1),
+          backgroundColor: isBanned
+              ? Colors.red.shade50
+              : const Color(0xFF2DA931).withOpacity(0.1),
           child: Icon(
             isBanned ? Icons.block : Icons.support_agent,
             color: isBanned ? Colors.red : const Color(0xFF2DA931),
           ),
         ),
-        title: Text(name, style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold)),
-        subtitle: Text(email, style: TextStyle(color: Colors.grey[600], fontSize: 13)),
+        title: Text(
+          name,
+          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+        ),
+        subtitle: Text(
+          email,
+          style: TextStyle(color: Colors.grey[600], fontSize: 13),
+        ),
         trailing: isBanned
             ? Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.red.shade50,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Text('BANNED', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 11)),
+                child: const Text(
+                  'BANNED',
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 11,
+                  ),
+                ),
               )
             : const Icon(Icons.chevron_right, color: Colors.grey),
       ),

@@ -54,7 +54,9 @@ class BiometricService extends ChangeNotifier {
 
     // Biometric features are not supported on web platform
     if (kIsWeb) {
-      debugPrint('⚠️ BiometricService: Web platform detected - biometrics not supported');
+      debugPrint(
+        '⚠️ BiometricService: Web platform detected - biometrics not supported',
+      );
       _isDeviceSupported = false;
       _canCheckBiometrics = false;
       _isBiometricEnabled = false;
@@ -98,7 +100,7 @@ class BiometricService extends ChangeNotifier {
       debugPrint('⚠️ Cannot enable biometrics - web platform not supported');
       return false;
     }
-    
+
     if (enabled && !_canCheckBiometrics) {
       debugPrint('⚠️ Cannot enable biometrics - not available');
       return false;
@@ -142,7 +144,7 @@ class BiometricService extends ChangeNotifier {
       debugPrint('⚠️ Biometrics not supported on web');
       return false;
     }
-    
+
     // We enforce availability check, but NOT the enabled check.
     // If the caller calls this, they WANT authentication (even if enabling).
     if (!_canCheckBiometrics || !_isDeviceSupported) {

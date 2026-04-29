@@ -438,7 +438,9 @@ class AdminActionButtons extends StatelessWidget {
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red.shade900),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red.shade900,
+            ),
             child: const Text(
               'Delete Forever',
               style: TextStyle(color: Colors.white),
@@ -465,7 +467,7 @@ class AdminActionButtons extends StatelessWidget {
         if (context.mounted) {
           // Pop loading dialog
           Navigator.of(context).pop();
-          
+
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('User deleted successfully'),
@@ -479,7 +481,7 @@ class AdminActionButtons extends StatelessWidget {
         if (context.mounted) {
           // Pop loading dialog
           Navigator.of(context).pop();
-          
+
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Failed to delete user: $e'),

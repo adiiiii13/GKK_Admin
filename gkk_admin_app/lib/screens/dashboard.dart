@@ -415,6 +415,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                 isDark ? Icons.light_mode : Icons.dark_mode,
                 color: const Color(0xFF2da832),
               ),
+              tooltip: isDark ? 'Switch to light mode' : 'Switch to dark mode',
               onPressed: () {
                 final box = buttonContext.findRenderObject() as RenderBox;
                 final position = box.localToGlobal(
@@ -427,6 +428,7 @@ class _DashboardScreenState extends State<DashboardScreen>
         ),
         IconButton(
           icon: const Icon(Icons.logout, color: Color(0xFFE63946)),
+          tooltip: 'Log out',
           onPressed: _logout,
         ),
         const SizedBox(width: 8),

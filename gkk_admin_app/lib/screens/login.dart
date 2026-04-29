@@ -298,6 +298,7 @@ class _LoginScreenState extends State<LoginScreen>
                       : Icons.visibility_off_outlined,
                   color: const Color(0xFF2da832),
                 ),
+                tooltip: _obscurePassword ? 'Show password' : 'Hide password',
                 onPressed: () =>
                     setState(() => _obscurePassword = !_obscurePassword),
               ),

@@ -6,7 +6,11 @@ class AgentDetailScreen extends StatefulWidget {
   final Map<String, dynamic> agent;
   final SupabaseClient supportClient;
 
-  const AgentDetailScreen({super.key, required this.agent, required this.supportClient});
+  const AgentDetailScreen({
+    super.key,
+    required this.agent,
+    required this.supportClient,
+  });
 
   @override
   State<AgentDetailScreen> createState() => _AgentDetailScreenState();
@@ -62,11 +66,16 @@ class _AgentDetailScreenState extends State<AgentDetailScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(_isBanned ? 'Unban Agent?' : 'Ban Agent?'),
-        content: Text(_isBanned 
-            ? 'This agent will be able to login again.'
-            : 'This agent will be immediately disconnected and cannot login.'),
+        content: Text(
+          _isBanned
+              ? 'This agent will be able to login again.'
+              : 'This agent will be immediately disconnected and cannot login.',
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
@@ -82,22 +91,22 @@ class _AgentDetailScreenState extends State<AgentDetailScreen> {
     if (confirm == true) {
       try {
         // Upsert the agent record (creates if not exists)
-        await widget.supportClient
-            .from('support_agents')
-            .upsert({
-              'id': widget.agent['id'],
-              'email': widget.agent['email'],
-              'name': widget.agent['name'],
-              'is_banned': !_isBanned,
-              'banned_at': _isBanned ? null : DateTime.now().toIso8601String(),
-            });
+        await widget.supportClient.from('support_agents').upsert({
+          'id': widget.agent['id'],
+          'email': widget.agent['email'],
+          'name': widget.agent['name'],
+          'is_banned': !_isBanned,
+          'banned_at': _isBanned ? null : DateTime.now().toIso8601String(),
+        });
 
         setState(() => _isBanned = !_isBanned);
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(_isBanned ? 'Agent has been banned' : 'Agent has been unbanned'),
+              content: Text(
+                _isBanned ? 'Agent has been banned' : 'Agent has been unbanned',
+              ),
               backgroundColor: _isBanned ? Colors.red : const Color(0xFF2DA931),
             ),
           );
@@ -120,7 +129,10 @@ class _AgentDetailScreenState extends State<AgentDetailScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FD),
       appBar: AppBar(
-        title: Text('Agent Details', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold)),
+        title: Text(
+          'Agent Details',
+          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,
@@ -138,32 +150,56 @@ class _AgentDetailScreenState extends State<AgentDetailScreen> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
-                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                        ),
+                      ],
                     ),
                     child: Column(
                       children: [
                         CircleAvatar(
                           radius: 40,
-                          backgroundColor: _isBanned ? Colors.red.shade50 : const Color(0xFF2DA931).withOpacity(0.1),
+                          backgroundColor: _isBanned
+                              ? Colors.red.shade50
+                              : const Color(0xFF2DA931).withOpacity(0.1),
                           child: Icon(
                             _isBanned ? Icons.block : Icons.support_agent,
                             size: 40,
-                            color: _isBanned ? Colors.red : const Color(0xFF2DA931),
+                            color: _isBanned
+                                ? Colors.red
+                                : const Color(0xFF2DA931),
                           ),
                         ),
                         const SizedBox(height: 16),
-                        Text(name, style: GoogleFonts.plusJakartaSans(fontSize: 22, fontWeight: FontWeight.bold)),
+                        Text(
+                          name,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                         const SizedBox(height: 8),
                         Text(email, style: TextStyle(color: Colors.grey[600])),
                         if (_isBanned) ...[
                           const SizedBox(height: 12),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.red.shade50,
                               borderRadius: BorderRadius.circular(20),
                             ),
-                            child: const Text('⛔ BANNED', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                            child: const Text(
+                              '⛔ BANNED',
+                              style: TextStyle(
+                                color: Colors.red,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                         ],
                       ],
@@ -173,18 +209,43 @@ class _AgentDetailScreenState extends State<AgentDetailScreen> {
                   const SizedBox(height: 24),
 
                   // Analytics Section
-                  Text('Performance Analytics', style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text(
+                    'Performance Analytics',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   const SizedBox(height: 16),
 
                   Row(
                     children: [
-                      Expanded(child: _buildStatCard('Solved', _ticketsSolved, Colors.green, Icons.check_circle)),
+                      Expanded(
+                        child: _buildStatCard(
+                          'Solved',
+                          _ticketsSolved,
+                          Colors.green,
+                          Icons.check_circle,
+                        ),
+                      ),
                       const SizedBox(width: 12),
-                      Expanded(child: _buildStatCard('Active', _ticketsActive, Colors.orange, Icons.pending)),
+                      Expanded(
+                        child: _buildStatCard(
+                          'Active',
+                          _ticketsActive,
+                          Colors.orange,
+                          Icons.pending,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 12),
-                  _buildStatCard('Total Handled', _ticketsTotal, const Color(0xFF2DA931), Icons.support_agent),
+                  _buildStatCard(
+                    'Total Handled',
+                    _ticketsTotal,
+                    const Color(0xFF2DA931),
+                    Icons.support_agent,
+                  ),
 
                   const SizedBox(height: 32),
 
@@ -194,12 +255,18 @@ class _AgentDetailScreenState extends State<AgentDetailScreen> {
                     child: ElevatedButton.icon(
                       onPressed: _toggleBan,
                       icon: Icon(_isBanned ? Icons.check_circle : Icons.block),
-                      label: Text(_isBanned ? 'UNBAN AGENT' : 'REVOKE / BAN AGENT'),
+                      label: Text(
+                        _isBanned ? 'UNBAN AGENT' : 'REVOKE / BAN AGENT',
+                      ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: _isBanned ? const Color(0xFF2DA931) : Colors.red,
+                        backgroundColor: _isBanned
+                            ? const Color(0xFF2DA931)
+                            : Colors.red,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     ),
                   ),
@@ -215,7 +282,9 @@ class _AgentDetailScreenState extends State<AgentDetailScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10),
+        ],
       ),
       child: Row(
         children: [
@@ -231,8 +300,18 @@ class _AgentDetailScreenState extends State<AgentDetailScreen> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(value.toString(), style: GoogleFonts.plusJakartaSans(fontSize: 24, fontWeight: FontWeight.bold, color: color)),
-              Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+              Text(
+                value.toString(),
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
+              ),
+              Text(
+                label,
+                style: TextStyle(color: Colors.grey[600], fontSize: 12),
+              ),
             ],
           ),
         ],

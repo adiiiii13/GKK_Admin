@@ -82,11 +82,11 @@ class UserModel {
       phone: json['phone'] ?? '',
       role: _parseRole(json['role'] ?? 'customer'),
       status: _parseStatus(json['status'] ?? 'verified'),
-      dateApplied: json['dateApplied'] != null 
-          ? DateTime.parse(json['dateApplied']) 
-          : (json['created_at'] != null 
-              ? DateTime.parse(json['created_at']) 
-              : DateTime.now()),
+      dateApplied: json['dateApplied'] != null
+          ? DateTime.parse(json['dateApplied'])
+          : (json['created_at'] != null
+                ? DateTime.parse(json['created_at'])
+                : DateTime.now()),
       profileImage: json['profileImage'] ?? json['avatar_url'],
       warnings:
           (json['warnings'] as List?)
