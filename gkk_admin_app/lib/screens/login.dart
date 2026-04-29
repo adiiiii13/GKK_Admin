@@ -176,6 +176,21 @@ class _LoginScreenState extends State<LoginScreen>
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      // Dev Login Button - Prominent Position
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 16),
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.pushReplacementNamed(context, '/dashboard');
+                          },
+                          icon: const Icon(Icons.developer_mode, color: Colors.white),
+                          label: const Text('DEV LOGIN', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.deepOrange,
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          ),
+                        ),
+                      ),
                       _buildLogoSection(isDark),
                       const SizedBox(height: 48),
                       _buildFormCard(isDark),
@@ -431,6 +446,22 @@ class _LoginScreenState extends State<LoginScreen>
         ),
         const SizedBox(height: 24),
         _buildGoogleButton(),
+        const SizedBox(height: 16),
+        // Dev Login Button for Testing
+        TextButton.icon(
+          onPressed: () {
+            Navigator.pushReplacementNamed(context, '/dashboard');
+          },
+          icon: const Icon(Icons.developer_mode, size: 16, color: Colors.orange),
+          label: const Text(
+            'Dev Login (Skip Auth)',
+            style: TextStyle(
+              color: Colors.orange,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
       ],
     );
   }

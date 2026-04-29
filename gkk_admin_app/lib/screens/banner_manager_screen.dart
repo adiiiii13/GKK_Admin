@@ -1,9 +1,12 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:provider/provider.dart';
 import '../services/services.dart';
 import '../utils/theme_constants.dart';
 
-/// Banner Manager Screen - CRUD operations for User app home carousel cards
+/// Banner Manager Screen - CRUD operations for User app home car sel cards
 class BannerManagerScreen extends StatefulWidget {
   const BannerManagerScreen({Key? key}) : super(key: key);
 
@@ -497,6 +500,51 @@ class _BannerEditorDialogState extends State<BannerEditorDialog> {
   bool _isActive = true;
   bool _isSaving = false;
 
+  // Image upload state
+  Uint8List? _selectedImageBytes;
+  String? _selectedImageName;
+  bool _isUploading = false;
+
+  Future<void> _pickImage() async {
+    try {
+      final picker = ImagePicker();
+      final picked = await picker.pickImage(source: ImageSource.gallery, maxWidth: 1024);
+      if (picked != null) {
+        final bytes = await picked.readAsBytes();
+        setState(() {
+          _selectedImageBytes = bytes;
+          _selectedImageName = picked.name;
+          _imageUrlController.clear(); // Clear manual URL if picking image
+        });
+      }
+    } catch (e) {
+      debugPrint('Image pick error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to pick image'), backgroundColor: Colors.red),
+      );
+    }
+  }
+
+  Future<String?> _uploadImage() async {
+    if (_selectedImageBytes == null) return null;
+    
+    setState(() => _isUploading = true);
+    try {
+      // Using notification-images bucket for simplicity as requested by user
+      final fileName = 'banners/${DateTime.now().millisecondsSinceEpoch}_$_selectedImageName';
+      
+      final storage = Supabase.instance.client.storage.from('notification-images');
+      await storage.uploadBinary(fileName, _selectedImageBytes!);
+      
+      return storage.getPublicUrl(fileName);
+    } catch (e) {
+      debugPrint('Upload error: $e');
+      return null;
+    } finally {
+      if (mounted) setState(() => _isUploading = false);
+    }
+  }
+
   final List<Map<String, dynamic>> _colorOptions = [
     {'name': 'Orange', 'color': '#FF9800'},
     {'name': 'Pink', 'color': '#E91E63'},
@@ -565,11 +613,22 @@ class _BannerEditorDialogState extends State<BannerEditorDialog> {
     try {
       final mainDb = context.read<MainDatabaseService>();
       
+      // Upload image if selected
+      String imageUrl = _imageUrlController.text.trim();
+      if (_selectedImageBytes != null) {
+        final uploadedUrl = await _uploadImage();
+        if (uploadedUrl != null) {
+          imageUrl = uploadedUrl;
+        } else {
+          throw 'Failed to upload image';
+        }
+      }
+
       final bannerData = {
         'tag': _tagController.text.trim(),
         'title': _titleController.text.trim(),
         'subtitle': _subtitleController.text.trim(),
-        'image_url': _imageUrlController.text.trim(),
+        'image_url': imageUrl,
         'click_url': _clickUrlController.text.trim(),
         'badge_color': _selectedColor,
         'background_color': _selectedBgColor,
@@ -711,12 +770,83 @@ class _BannerEditorDialogState extends State<BannerEditorDialog> {
                         isDark: isDark,
                       ),
                       const SizedBox(height: 16),
-                      _buildTextField(
-                        controller: _imageUrlController,
-                        label: 'Image URL',
-                        hint: 'https://example.com/image.jpg',
-                        icon: Icons.image,
-                        isDark: isDark,
+                      // Image Selection Section
+                      const SizedBox(height: 16),
+                      Text(
+                        'Banner Image',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.getTextColor(isDark),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      // Preview
+                      if (_selectedImageBytes != null)
+                        Stack(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.memory(
+                                _selectedImageBytes!,
+                                height: 150,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            Positioned(
+                              top: 8,
+                              right: 8,
+                              child: IconButton(
+                                onPressed: () {
+                                  setState(() {
+                                    _selectedImageBytes = null;
+                                    _selectedImageName = null;
+                                  });
+                                },
+                                icon: const Icon(Icons.close, color: Colors.white),
+                                style: IconButton.styleFrom(backgroundColor: Colors.black54),
+                              ),
+                            ),
+                          ],
+                        )
+                      else if (_imageUrlController.text.isNotEmpty)
+                         ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.network(
+                              _imageUrlController.text,
+                              height: 150,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_,__,___) => const SizedBox(),
+                            ),
+                          ),
+                      
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildTextField(
+                              controller: _imageUrlController,
+                              label: 'Image URL',
+                              hint: 'or paste URL here',
+                              icon: Icons.link,
+                              isDark: isDark,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          ElevatedButton.icon(
+                            onPressed: _isUploading ? null : _pickImage,
+                            icon: _isUploading 
+                                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) 
+                                : const Icon(Icons.upload_file),
+                            label: Text(_isUploading ? 'Uploading...' : 'Upload'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF2da832),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 16),
                       _buildTextField(

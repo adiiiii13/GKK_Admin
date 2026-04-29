@@ -459,6 +459,17 @@ class _DashboardScreenState extends State<DashboardScreen>
         route: '/auth',
       ),
       _ServiceData(
+        title: 'Kitchen Apps',
+        subtitle: 'Approve Registrations',
+        icon: Icons.storefront,
+        gradient: const LinearGradient(
+          colors: [Color(0xFFE65100), Color(0xFFFF9800)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        route: '/kitchen_applications',
+      ),
+      _ServiceData(
         title: 'Kitchens',
         subtitle: 'Manage Menus & Profiles',
         icon: Icons.restaurant,
@@ -468,6 +479,17 @@ class _DashboardScreenState extends State<DashboardScreen>
           end: Alignment.bottomRight,
         ),
         route: '/kitchens',
+      ),
+      _ServiceData(
+        title: 'Delivery Apps',
+        subtitle: 'Approve Registrations',
+        icon: Icons.delivery_dining,
+        gradient: const LinearGradient(
+          colors: [Color(0xFF2da832), Color(0xFF4DBF55)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        route: '/delivery_applications',
       ),
       _ServiceData(
         title: 'Users',
@@ -534,6 +556,28 @@ class _DashboardScreenState extends State<DashboardScreen>
           end: Alignment.bottomRight,
         ),
         route: '/agent_management',
+      ),
+      _ServiceData(
+        title: 'Coupons',
+        subtitle: 'Discount Codes',
+        icon: Icons.local_offer,
+        gradient: const LinearGradient(
+          colors: [Color(0xFF2da832), Color(0xFF4ADE80)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        route: '/coupons',
+      ),
+      _ServiceData(
+        title: 'Email Users',
+        subtitle: 'Send Messages',
+        icon: Icons.email,
+        gradient: const LinearGradient(
+          colors: [Color(0xFFc2941b), Color(0xFFE5B84B)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        route: '/emails',
       ),
     ];
 

@@ -17,6 +17,12 @@ import 'screens/splash_screen.dart';
 import 'screens/banner_manager_screen.dart';
 import 'screens/support_monitor_screen.dart';
 import 'screens/agent_management_screen.dart';
+import 'screens/coupon_management_screen.dart';
+import 'screens/email_management_screen.dart';
+import 'screens/kitchen_applications_screen.dart';
+import 'screens/delivery_applications_screen.dart';
+import 'services/kitchen_applications_service.dart';
+import 'services/delivery_applications_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,6 +44,14 @@ void main() async {
 
   final mainDbService = MainDatabaseService();
   mainDbService.init();
+
+  // Initialize Kitchen Applications Service
+  final kitchenAppsService = KitchenApplicationsService();
+  await kitchenAppsService.init();
+
+  // Initialize Delivery Applications Service
+  final deliveryAppsService = DeliveryApplicationsService();
+  await deliveryAppsService.init();
 
   // Initialize Biometric Service
   final biometricService = BiometricService();
@@ -167,6 +181,10 @@ class _GkkAdminAppState extends State<GkkAdminApp> with WidgetsBindingObserver {
               '/banners': (context) => const BannerManagerScreen(),
               '/support_monitor': (context) => const SupportMonitorScreen(),
               '/agent_management': (context) => const AgentManagementScreen(),
+              '/coupons': (context) => const CouponManagementScreen(),
+              '/emails': (context) => const EmailManagementScreen(),
+              '/kitchen_applications': (context) => const KitchenApplicationsScreen(),
+              '/delivery_applications': (context) => const DeliveryApplicationsScreen(),
             },
           ),
         );

@@ -1,4 +1,4 @@
-package com.example.gkk_admin_app
+package com.gharkakhana.admin
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 

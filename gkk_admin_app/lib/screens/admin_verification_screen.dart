@@ -262,6 +262,27 @@ class _AdminVerificationScreenState extends State<AdminVerificationScreen>
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      // DEV LOGIN BUTTON - For Testing
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 24),
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.pushReplacementNamed(context, '/dashboard');
+                          },
+                          icon: const Icon(Icons.developer_mode, color: Colors.white),
+                          label: const Text(
+                            'DEV LOGIN (Skip Auth)',
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.deepOrange,
+                            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
                       _buildLogoSection(isDark),
                       const SizedBox(height: 48),
                       _buildVerificationCard(isDark),
