@@ -20,7 +20,7 @@ class _NotifierScreenState extends State<NotifierScreen> {
   final _bodyController = TextEditingController();
   final _imageUrlController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  
+
   // Image upload state
   Uint8List? _selectedImageBytes;
   String? _selectedImageName;
@@ -39,7 +39,10 @@ class _NotifierScreenState extends State<NotifierScreen> {
   Future<void> _pickImage() async {
     try {
       final picker = ImagePicker();
-      final picked = await picker.pickImage(source: ImageSource.gallery, maxWidth: 1024);
+      final picked = await picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1024,
+      );
       if (picked != null) {
         final bytes = await picked.readAsBytes();
         setState(() {
@@ -57,19 +60,20 @@ class _NotifierScreenState extends State<NotifierScreen> {
   /// Upload image to Supabase Storage and get public URL
   Future<String?> _uploadImageToSupabase() async {
     if (_selectedImageBytes == null) return null;
-    
+
     setState(() => _isUploading = true);
     try {
-      final fileName = 'notifications/${DateTime.now().millisecondsSinceEpoch}_$_selectedImageName';
-      
+      final fileName =
+          'notifications/${DateTime.now().millisecondsSinceEpoch}_$_selectedImageName';
+
       await Supabase.instance.client.storage
           .from('notification-images')
           .uploadBinary(fileName, _selectedImageBytes!);
-      
+
       final publicUrl = Supabase.instance.client.storage
           .from('notification-images')
           .getPublicUrl(fileName);
-      
+
       return publicUrl;
     } catch (e) {
       debugPrint('Upload error: $e');
@@ -91,7 +95,7 @@ class _NotifierScreenState extends State<NotifierScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isSending = true);
-    
+
     final notificationService = Provider.of<NotificationService>(
       context,
       listen: false,
@@ -99,20 +103,23 @@ class _NotifierScreenState extends State<NotifierScreen> {
 
     try {
       // Get image URL (from upload or manual URL)
-      String? imageUrl = _imageUrlController.text.trim().isNotEmpty 
-          ? _imageUrlController.text.trim() 
+      String? imageUrl = _imageUrlController.text.trim().isNotEmpty
+          ? _imageUrlController.text.trim()
           : null;
-      
+
       // If we have a selected image, upload it first
       if (_selectedImageBytes != null) {
         final uploadedUrl = await _uploadImageToSupabase();
         if (uploadedUrl != null) {
           imageUrl = uploadedUrl;
         } else {
-          _showSnackBar('Failed to upload image, sending without image', isSuccess: false);
+          _showSnackBar(
+            'Failed to upload image, sending without image',
+            isSuccess: false,
+          );
         }
       }
-      
+
       await notificationService.sendNotification(
         title: _titleController.text.trim(),
         body: _bodyController.text.trim(),
@@ -424,40 +431,61 @@ class _NotifierScreenState extends State<NotifierScreen> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppTheme.primaryGreen, width: 2),
+                  borderSide: const BorderSide(
+                    color: AppTheme.primaryGreen,
+                    width: 2,
+                  ),
                 ),
                 filled: true,
                 fillColor: isDark ? Colors.grey.shade900 : Colors.grey.shade50,
               ),
             ),
             const SizedBox(height: 12),
-            
+
             // OR Divider
             Row(
               children: [
                 Expanded(child: Divider(color: Colors.grey.shade400)),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text('OR', style: TextStyle(color: Colors.grey.shade500, fontWeight: FontWeight.w500)),
+                  child: Text(
+                    'OR',
+                    style: TextStyle(
+                      color: Colors.grey.shade500,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                 ),
                 Expanded(child: Divider(color: Colors.grey.shade400)),
               ],
             ),
             const SizedBox(height: 12),
-            
+
             // Upload Image Button
             OutlinedButton.icon(
               onPressed: _isSending ? null : _pickImage,
-              icon: Icon(_selectedImageBytes != null ? Icons.check_circle : Icons.upload, color: AppTheme.primaryGreen),
-              label: Text(_selectedImageBytes != null ? 'Image Selected ($_selectedImageName)' : 'Upload Image'),
+              icon: Icon(
+                _selectedImageBytes != null ? Icons.check_circle : Icons.upload,
+                color: AppTheme.primaryGreen,
+              ),
+              label: Text(
+                _selectedImageBytes != null
+                    ? 'Image Selected ($_selectedImageName)'
+                    : 'Upload Image',
+              ),
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppTheme.primaryGreen,
                 side: BorderSide(color: AppTheme.primaryGreen),
-                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 14,
+                  horizontal: 16,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
-            
+
             // Selected Image Preview
             if (_selectedImageBytes != null) ...[
               const SizedBox(height: 12),
@@ -472,7 +500,10 @@ class _NotifierScreenState extends State<NotifierScreen> {
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(12),
-                      child: Image.memory(_selectedImageBytes!, fit: BoxFit.cover),
+                      child: Image.memory(
+                        _selectedImageBytes!,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                   Positioned(
@@ -495,20 +526,31 @@ class _NotifierScreenState extends State<NotifierScreen> {
               height: 54,
               child: ElevatedButton.icon(
                 onPressed: _isSending ? null : _sendNotification,
-                icon: _isSending 
+                icon: _isSending
                     ? const SizedBox(
-                        width: 20, 
-                        height: 20, 
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
                       )
                     : const Icon(Icons.send, color: Colors.white),
                 label: Text(
-                  _isSending ? (_isUploading ? 'Uploading Image...' : 'Sending...') : 'Send Announcement',
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                  _isSending
+                      ? (_isUploading ? 'Uploading Image...' : 'Sending...')
+                      : 'Send Announcement',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primaryGreen,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
               ),
             ),
@@ -518,7 +560,7 @@ class _NotifierScreenState extends State<NotifierScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: isDark 
+                color: isDark
                     ? Colors.blue.shade900.withValues(alpha: 0.3)
                     : Colors.blue.shade50,
                 borderRadius: BorderRadius.circular(10),
@@ -534,7 +576,9 @@ class _NotifierScreenState extends State<NotifierScreen> {
                       Icon(
                         Icons.auto_awesome,
                         size: 16,
-                        color: isDark ? Colors.blue.shade300 : Colors.blue.shade700,
+                        color: isDark
+                            ? Colors.blue.shade300
+                            : Colors.blue.shade700,
                       ),
                       const SizedBox(width: 8),
                       Text(
@@ -542,7 +586,9 @@ class _NotifierScreenState extends State<NotifierScreen> {
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
-                          color: isDark ? Colors.blue.shade300 : Colors.blue.shade700,
+                          color: isDark
+                              ? Colors.blue.shade300
+                              : Colors.blue.shade700,
                         ),
                       ),
                     ],
@@ -552,7 +598,9 @@ class _NotifierScreenState extends State<NotifierScreen> {
                     'Use @user to address each user by their name',
                     style: TextStyle(
                       fontSize: 12,
-                      color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                      color: isDark
+                          ? Colors.grey.shade400
+                          : Colors.grey.shade600,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -572,9 +620,14 @@ class _NotifierScreenState extends State<NotifierScreen> {
                       );
                     },
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
-                        color: isDark ? Colors.blue.shade800 : Colors.blue.shade100,
+                        color: isDark
+                            ? Colors.blue.shade800
+                            : Colors.blue.shade100,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Row(
@@ -591,7 +644,9 @@ class _NotifierScreenState extends State<NotifierScreen> {
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
-                              color: isDark ? Colors.white : Colors.blue.shade700,
+                              color: isDark
+                                  ? Colors.white
+                                  : Colors.blue.shade700,
                             ),
                           ),
                         ],

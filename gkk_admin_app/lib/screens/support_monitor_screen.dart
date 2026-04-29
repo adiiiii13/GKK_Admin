@@ -28,7 +28,10 @@ class _SupportMonitorScreenState extends State<SupportMonitorScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FD),
       appBar: AppBar(
-        title: Text('Customer Tickets', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold)),
+        title: Text(
+          'Customer Tickets',
+          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,
@@ -39,11 +42,14 @@ class _SupportMonitorScreenState extends State<SupportMonitorScreen> {
             .stream(primaryKey: ['id'])
             .order('created_at', ascending: false), // Newest first for Admin
         builder: (context, snapshot) {
-          if (snapshot.hasError) return Center(child: Text('Error: ${snapshot.error}'));
-          if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+          if (snapshot.hasError)
+            return Center(child: Text('Error: ${snapshot.error}'));
+          if (!snapshot.hasData)
+            return const Center(child: CircularProgressIndicator());
 
           final tickets = snapshot.data!;
-          if (tickets.isEmpty) return const Center(child: Text('No tickets found.'));
+          if (tickets.isEmpty)
+            return const Center(child: Text('No tickets found.'));
 
           return ListView.builder(
             padding: const EdgeInsets.all(16),
@@ -62,7 +68,7 @@ class _SupportMonitorScreenState extends State<SupportMonitorScreen> {
     final status = ticket['status'];
     final time = DateTime.parse(ticket['created_at']).toLocal();
     final agentId = ticket['agent_id'];
-    
+
     return Card(
       elevation: 0,
       margin: const EdgeInsets.only(bottom: 12),
@@ -72,8 +78,11 @@ class _SupportMonitorScreenState extends State<SupportMonitorScreen> {
       ),
       child: ListTile(
         onTap: () => Navigator.push(
-          context, 
-          MaterialPageRoute(builder: (_) => SupportChatViewer(ticket: ticket, client: _supportClient))
+          context,
+          MaterialPageRoute(
+            builder: (_) =>
+                SupportChatViewer(ticket: ticket, client: _supportClient),
+          ),
         ),
         leading: CircleAvatar(
           backgroundColor: _getStatusColor(status).withOpacity(0.1),
@@ -87,13 +96,16 @@ class _SupportMonitorScreenState extends State<SupportMonitorScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Created: ${DateFormat('MMM d, h:mm a').format(time)}'),
-            if (agentId != null) 
+            if (agentId != null)
               Text(
                 'Agent: ...${agentId.toString().substring(0, 6)}',
                 style: const TextStyle(fontSize: 12, color: Colors.blueGrey),
               )
             else
-              const Text('Unassigned', style: TextStyle(fontSize: 12, color: Colors.orange)),
+              const Text(
+                'Unassigned',
+                style: TextStyle(fontSize: 12, color: Colors.orange),
+              ),
           ],
         ),
         trailing: Container(
@@ -104,7 +116,11 @@ class _SupportMonitorScreenState extends State<SupportMonitorScreen> {
           ),
           child: Text(
             status.toString().toUpperCase(),
-            style: TextStyle(color: _getStatusColor(status), fontWeight: FontWeight.bold, fontSize: 12),
+            style: TextStyle(
+              color: _getStatusColor(status),
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+            ),
           ),
         ),
       ),
@@ -128,7 +144,11 @@ class SupportChatViewer extends StatefulWidget {
   final Map<String, dynamic> ticket;
   final SupabaseClient client;
 
-  const SupportChatViewer({super.key, required this.ticket, required this.client});
+  const SupportChatViewer({
+    super.key,
+    required this.ticket,
+    required this.client,
+  });
 
   @override
   State<SupportChatViewer> createState() => _SupportChatViewerState();
@@ -155,16 +175,16 @@ class _SupportChatViewerState extends State<SupportChatViewer> {
       // 1. Fetch User Name from User App DB (GKK Basic)
       final userId = widget.ticket['user_id'];
       String uName = 'Unknown User';
-      
+
       if (userId != null) {
         final userRes = await _userDbClient
             .from('users')
             .select('name, email')
             .eq('id', userId)
             .maybeSingle();
-        
+
         if (userRes != null) {
-           uName = userRes['name'] ?? userRes['email'] ?? 'Unknown User';
+          uName = userRes['name'] ?? userRes['email'] ?? 'Unknown User';
         }
       }
 
@@ -174,21 +194,21 @@ class _SupportChatViewerState extends State<SupportChatViewer> {
       String aEmail = 'Unassigned';
 
       if (ticketAgentEmail != null && ticketAgentEmail.toString().isNotEmpty) {
-         // Use email stored directly in ticket
-         aEmail = ticketAgentEmail;
+        // Use email stored directly in ticket
+        aEmail = ticketAgentEmail;
       } else if (agentId != null) {
-         // Fallback: Query support_agents table
-         final agentRes = await widget.client
-             .from('support_agents')
-             .select('email, name')
-             .eq('id', agentId)
-             .maybeSingle();
-         
-         if (agentRes != null) {
-            aEmail = agentRes['email'] ?? agentRes['name'] ?? 'Agent';
-         } else {
-            aEmail = 'Agent: ${agentId.toString().substring(0,6)}...'; 
-         }
+        // Fallback: Query support_agents table
+        final agentRes = await widget.client
+            .from('support_agents')
+            .select('email, name')
+            .eq('id', agentId)
+            .maybeSingle();
+
+        if (agentRes != null) {
+          aEmail = agentRes['email'] ?? agentRes['name'] ?? 'Agent';
+        } else {
+          aEmail = 'Agent: ${agentId.toString().substring(0, 6)}...';
+        }
       }
 
       if (mounted) {
@@ -201,8 +221,8 @@ class _SupportChatViewerState extends State<SupportChatViewer> {
       debugPrint('Error fetching details: $e');
       if (mounted) {
         setState(() {
-           _userName = 'Error';
-           _agentEmail = 'Error';
+          _userName = 'Error';
+          _agentEmail = 'Error';
         });
       }
     }
@@ -232,8 +252,17 @@ class _SupportChatViewerState extends State<SupportChatViewer> {
                 Expanded(
                   child: Column(
                     children: [
-                      const Text('User', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                      Text(_userName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      const Text(
+                        'User',
+                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                      Text(
+                        _userName,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -241,8 +270,17 @@ class _SupportChatViewerState extends State<SupportChatViewer> {
                 Expanded(
                   child: Column(
                     children: [
-                      const Text('Agent', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                      Text(_agentEmail, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                      const Text(
+                        'Agent',
+                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                      Text(
+                        _agentEmail,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -258,10 +296,12 @@ class _SupportChatViewerState extends State<SupportChatViewer> {
                   .eq('ticket_id', widget.ticket['id'])
                   .order('created_at', ascending: false),
               builder: (context, snapshot) {
-                if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+                if (!snapshot.hasData)
+                  return const Center(child: CircularProgressIndicator());
                 final messages = snapshot.data!;
 
-                if (messages.isEmpty) return const Center(child: Text('No messages yet.'));
+                if (messages.isEmpty)
+                  return const Center(child: Text('No messages yet.'));
 
                 return ListView.builder(
                   reverse: true,
@@ -273,33 +313,52 @@ class _SupportChatViewerState extends State<SupportChatViewer> {
                     final time = DateTime.parse(msg['created_at']).toLocal();
 
                     return Align(
-                      alignment: isAgent ? Alignment.centerLeft : Alignment.centerRight,
+                      alignment: isAgent
+                          ? Alignment.centerLeft
+                          : Alignment.centerRight,
                       child: Container(
                         margin: const EdgeInsets.only(bottom: 12),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        constraints: BoxConstraints(
+                          maxWidth: MediaQuery.of(context).size.width * 0.75,
+                        ),
                         decoration: BoxDecoration(
-                          color: isAgent ? Colors.green.shade50 : Colors.blue.shade50,
+                          color: isAgent
+                              ? Colors.green.shade50
+                              : Colors.blue.shade50,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: isAgent ? Colors.green.shade100 : Colors.blue.shade100),
+                          border: Border.all(
+                            color: isAgent
+                                ? Colors.green.shade100
+                                : Colors.blue.shade100,
+                          ),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                               isAgent ? 'Agent' : 'User',
-                               style: TextStyle(
-                                 fontSize: 10, 
-                                 fontWeight: FontWeight.bold,
-                                 color: isAgent ? Colors.green : Colors.blue
-                               ),
+                              isAgent ? 'Agent' : 'User',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: isAgent ? Colors.green : Colors.blue,
+                              ),
                             ),
                             const SizedBox(height: 4),
-                            Text(msg['message'], style: const TextStyle(fontSize: 16)),
+                            Text(
+                              msg['message'],
+                              style: const TextStyle(fontSize: 16),
+                            ),
                             const SizedBox(height: 4),
                             Text(
                               DateFormat('h:mm a').format(time),
-                              style: TextStyle(fontSize: 10, color: Colors.grey[600]),
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Colors.grey[600],
+                              ),
                             ),
                           ],
                         ),

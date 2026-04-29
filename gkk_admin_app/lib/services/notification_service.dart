@@ -84,7 +84,7 @@ class NotificationService extends ChangeNotifier {
         "body": body,
         "click_action": "FLUTTER_NOTIFICATION_CLICK",
       };
-      
+
       // Add image URL if provided
       if (imageUrl != null && imageUrl.isNotEmpty) {
         dataPayload["image_url"] = imageUrl;
@@ -100,9 +100,7 @@ class NotificationService extends ChangeNotifier {
             // Send as DATA message (not notification) so we can personalize @user
             "data": dataPayload,
             // Android-specific config for high priority delivery
-            "android": {
-              "priority": "high",
-            },
+            "android": {"priority": "high"},
           },
         }),
       );

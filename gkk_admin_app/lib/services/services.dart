@@ -90,11 +90,13 @@ class MainDatabaseService extends ChangeNotifier {
   SupabaseClient? _client;
 
   bool get isInitialized => _client != null;
-  
+
   /// Get the Supabase client for direct queries
   SupabaseClient get client {
     if (_client == null) {
-      throw Exception('MainDatabaseService not initialized. Call init() first.');
+      throw Exception(
+        'MainDatabaseService not initialized. Call init() first.',
+      );
     }
     return _client!;
   }
@@ -106,7 +108,9 @@ class MainDatabaseService extends ChangeNotifier {
 
     try {
       _client = SupabaseClient(url, key);
-      debugPrint('✅ MainDatabaseService initialized with HARDCODED credentials');
+      debugPrint(
+        '✅ MainDatabaseService initialized with HARDCODED credentials',
+      );
     } catch (e) {
       debugPrint('❌ MainDatabaseService init error: $e');
     }
@@ -126,23 +130,23 @@ class MainDatabaseService extends ChangeNotifier {
     try {
       // Simple select from users table - IGNORING FILTERS FOR DEBUG
       final response = await _client!.from('users').select('*');
-      
+
       debugPrint('✅ fetchUsers raw response count: ${response.length}');
 
       return (response as List).map((e) {
         try {
-           return UserModel.fromJson(e);
+          return UserModel.fromJson(e);
         } catch (parseError) {
-           debugPrint('❌ Parse Error for user ${e['id']}: $parseError');
-           // Return a safe fallback user
-            return UserModel(
-              id: e['id'] ?? 'unknown',
-              name: e['full_name'] ?? e['name'] ?? 'Parse Error',
-              email: e['email'] ?? 'error',
-              phone: '',
-              role: UserRole.customer,
-              dateApplied: DateTime.now(),
-            );
+          debugPrint('❌ Parse Error for user ${e['id']}: $parseError');
+          // Return a safe fallback user
+          return UserModel(
+            id: e['id'] ?? 'unknown',
+            name: e['full_name'] ?? e['name'] ?? 'Parse Error',
+            email: e['email'] ?? 'error',
+            phone: '',
+            role: UserRole.customer,
+            dateApplied: DateTime.now(),
+          );
         }
       }).toList();
     } catch (e) {
@@ -241,11 +245,14 @@ class MainDatabaseService extends ChangeNotifier {
     if (_client == null) return;
 
     try {
-      await _client!.from('users').update({
-        'status': 'rejected',
-        'is_banned': true,
-        'updated_at': DateTime.now().toIso8601String(),
-      }).eq('id', userId);
+      await _client!
+          .from('users')
+          .update({
+            'status': 'rejected',
+            'is_banned': true,
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', userId);
       notifyListeners();
     } catch (e) {
       debugPrint('Error revoking user: $e');
@@ -258,11 +265,14 @@ class MainDatabaseService extends ChangeNotifier {
     if (_client == null) return;
 
     try {
-      await _client!.from('users').update({
-        'status': 'verified',
-        'is_banned': false,
-        'updated_at': DateTime.now().toIso8601String(),
-      }).eq('id', userId);
+      await _client!
+          .from('users')
+          .update({
+            'status': 'verified',
+            'is_banned': false,
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', userId);
       notifyListeners();
     } catch (e) {
       debugPrint('Error restoring user: $e');
