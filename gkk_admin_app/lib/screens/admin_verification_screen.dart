@@ -267,16 +267,28 @@ class _AdminVerificationScreenState extends State<AdminVerificationScreen>
                         margin: const EdgeInsets.only(bottom: 24),
                         child: ElevatedButton.icon(
                           onPressed: () {
-                            Navigator.pushReplacementNamed(context, '/dashboard');
+                            Navigator.pushReplacementNamed(
+                              context,
+                              '/dashboard',
+                            );
                           },
-                          icon: const Icon(Icons.developer_mode, color: Colors.white),
+                          icon: const Icon(
+                            Icons.developer_mode,
+                            color: Colors.white,
+                          ),
                           label: const Text(
                             'DEV LOGIN (Skip Auth)',
-                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.deepOrange,
-                            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 32,
+                              vertical: 16,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -428,6 +440,7 @@ class _AdminVerificationScreenState extends State<AdminVerificationScreen>
                       : Icons.visibility_off_outlined,
                   color: const Color(0xFF2da832),
                 ),
+                tooltip: _obscurePassword ? 'Show password' : 'Hide password',
                 onPressed: () =>
                     setState(() => _obscurePassword = !_obscurePassword),
               ),
