@@ -1,0 +1,4 @@
+## 2024-04-30 - Remove Hardcoded Authentication Bypass Backdoors
+**Vulnerability:** Development login bypass buttons (`DEV LOGIN (Skip Auth)`) were left in the production code (`lib/screens/admin_verification_screen.dart` and `lib/screens/login.dart`), allowing any user to completely bypass authentication and jump directly to the protected `/dashboard` route.
+**Learning:** Development tools and shortcuts for bypassing authentication must be conditionally compiled or removed entirely before committing to main branches. Leaving them in code can lead to critical authorization bypass vulnerabilities if accidentally shipped to production.
+**Prevention:** Use environment variables (e.g., `kDebugMode` or `const bool.hasEnvironment(...)`) to conditionally render such testing features, or entirely rely on secure staging environments for testing instead of modifying production source code to bypass auth.
