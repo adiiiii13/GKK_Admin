@@ -1,0 +1,4 @@
+## 2024-05-01 - Remove Hardcoded Firebase Service Account Credentials
+**Vulnerability:** Found a hardcoded Firebase Service Account private key and client credentials inside `lib/credentials.dart`. This is a critical security risk as it exposes access to the FCM backend (and potentially the entire Firebase project) if the codebase is leaked or public.
+**Learning:** The secret was likely placed directly in the codebase for convenience during development, but flutter apps bundle dart files and source code can be reverse-engineered or published to public repositories, leaking the credentials.
+**Prevention:** Sensitive keys like service accounts should never be hardcoded. They should be loaded dynamically from environment variables using packages like `flutter_dotenv`. We moved the sensitive data to a `.env` file and configured `.gitignore` to prevent it from being committed.
