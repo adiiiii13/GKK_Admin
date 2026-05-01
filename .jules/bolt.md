@@ -1,0 +1,3 @@
+## 2024-05-01 - Missing Debouncing on Search Inputs
+**Learning:** The application has multiple search inputs (e.g., in `users_list.dart`, `delivery_list.dart`, `kitchens_list.dart`) that trigger a `setState` on every keystroke (`onChanged: (value) => setState(() => _searchQuery = value)`). This causes unnecessary full-widget re-renders for every typed character, which can lead to UI jank and performance degradation, especially when dealing with large lists or complex UI components.
+**Action:** Implement debouncing for search inputs using `Timer` from `dart:async` to delay the state update until the user pauses typing. This is a common performance optimization in Flutter for text inputs that trigger filtering or API calls.
