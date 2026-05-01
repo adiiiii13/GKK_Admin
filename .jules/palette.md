@@ -1,0 +1,1 @@
+## 2026-05-01 - Missing Tooltips in IconButtons\n**Learning:** Missing tooltips on `IconButton` widgets degrade screen reader accessibility and UI clarity.\n**Action:** Always provide explicit tooltips to icon-only buttons for screen-reader accessibility and clear UX cues.
