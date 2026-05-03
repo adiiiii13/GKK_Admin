@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../services/services.dart';
@@ -14,6 +15,7 @@ class DeliveryListScreen extends StatefulWidget {
 
 class _DeliveryListScreenState extends State<DeliveryListScreen> {
   final TextEditingController _searchController = TextEditingController();
+  Timer? _debounce;
   String _searchQuery = '';
   bool _isLoading = true;
   List<UserModel> _agents = [];
@@ -39,6 +41,7 @@ class _DeliveryListScreenState extends State<DeliveryListScreen> {
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _searchController.dispose();
     super.dispose();
   }
@@ -88,7 +91,15 @@ class _DeliveryListScreenState extends State<DeliveryListScreen> {
             ),
             child: TextField(
               controller: _searchController,
-              onChanged: (value) => setState(() => _searchQuery = value),
+              // Bolt: Debounce the search input to reduce unnecessary setState rebuilds while typing
+              onChanged: (value) {
+                if (_debounce?.isActive ?? false) _debounce!.cancel();
+                _debounce = Timer(const Duration(milliseconds: 300), () {
+                  if (mounted) {
+                    setState(() => _searchQuery = value);
+                  }
+                });
+              },
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 hintText: 'Search delivery agents...',
