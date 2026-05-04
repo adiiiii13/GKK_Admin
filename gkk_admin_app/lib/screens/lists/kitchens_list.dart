@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:provider/provider.dart';
 import '../../services/services.dart';
 import '../../utils/theme_constants.dart';
@@ -17,6 +18,7 @@ class _KitchensListScreenState extends State<KitchensListScreen> {
   String _searchQuery = '';
   bool _isLoading = true;
   List<UserModel> _kitchens = [];
+  Timer? _debounceTimer;
 
   @override
   void initState() {
@@ -39,6 +41,7 @@ class _KitchensListScreenState extends State<KitchensListScreen> {
 
   @override
   void dispose() {
+    _debounceTimer?.cancel();
     _searchController.dispose();
     super.dispose();
   }
@@ -89,7 +92,14 @@ class _KitchensListScreenState extends State<KitchensListScreen> {
             ),
             child: TextField(
               controller: _searchController,
-              onChanged: (value) => setState(() => _searchQuery = value),
+              onChanged: (value) {
+                if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
+                _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+                  if (mounted) {
+                    setState(() => _searchQuery = value);
+                  }
+                });
+              },
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 hintText: 'Search kitchens...',
