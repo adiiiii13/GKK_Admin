@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:googleapis_auth/auth_io.dart';
-import '../credentials.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /// FCM Push Notification Service for sending notifications to all app users.
 ///
@@ -65,6 +65,30 @@ class NotificationService extends ChangeNotifier {
     notifyListeners();
 
     try {
+      final projectId = dotenv.env['FIREBASE_PROJECT_ID'] ?? '';
+      final privateKey = (dotenv.env['FIREBASE_PRIVATE_KEY'] ?? '').replaceAll(
+        r'\n',
+        '\n',
+      );
+      final clientEmail = dotenv.env['FIREBASE_CLIENT_EMAIL'] ?? '';
+      final clientId = dotenv.env['FIREBASE_CLIENT_ID'] ?? '';
+
+      final Map<String, dynamic> serviceAccountJson = {
+        "type": "service_account",
+        "project_id": projectId,
+        "private_key_id": dotenv.env['FIREBASE_PRIVATE_KEY_ID'] ?? '',
+        "private_key": privateKey,
+        "client_email": clientEmail,
+        "client_id": clientId,
+        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        "token_uri": "https://oauth2.googleapis.com/token",
+        "auth_provider_x509_cert_url":
+            "https://www.googleapis.com/oauth2/v1/certs",
+        "client_x509_cert_url":
+            "https://www.googleapis.com/robot/v1/metadata/x509/${Uri.encodeComponent(clientEmail)}",
+        "universe_domain": "googleapis.com",
+      };
+
       // 1. Authenticate with service account
       final credentials = ServiceAccountCredentials.fromJson(
         serviceAccountJson,
@@ -73,7 +97,6 @@ class NotificationService extends ChangeNotifier {
       final client = await clientViaServiceAccount(credentials, scopes);
 
       // 2. Build FCM v1 API endpoint
-      final projectId = serviceAccountJson['project_id'];
       final uri = Uri.parse(
         'https://fcm.googleapis.com/v1/projects/$projectId/messages:send',
       );
@@ -84,7 +107,7 @@ class NotificationService extends ChangeNotifier {
         "body": body,
         "click_action": "FLUTTER_NOTIFICATION_CLICK",
       };
-      
+
       // Add image URL if provided
       if (imageUrl != null && imageUrl.isNotEmpty) {
         dataPayload["image_url"] = imageUrl;
@@ -100,9 +123,7 @@ class NotificationService extends ChangeNotifier {
             // Send as DATA message (not notification) so we can personalize @user
             "data": dataPayload,
             // Android-specific config for high priority delivery
-            "android": {
-              "priority": "high",
-            },
+            "android": {"priority": "high"},
           },
         }),
       );
