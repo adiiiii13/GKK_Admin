@@ -1,0 +1,3 @@
+## 2024-05-08 - TextField setState calls without debounce
+**Learning:** TextFields in Flutter trigger `onChanged` and execute `setState` on every keystroke. For search boxes that manage and filter large lists locally (as in `kitchens_list.dart`, `delivery_list.dart`, `users_list.dart`), this causes unnecessary expensive UI rebuilds and CPU cycles.
+**Action:** When creating or optimizing search fields that update a widget's state and filter lists, wrap the `setState` operation in a `Timer` (e.g., 300ms) to debounce the input. Remember to cancel the timer on subsequent inputs and in the `dispose` method to prevent memory leaks or calling `setState` on unmounted widgets.
