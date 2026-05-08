@@ -181,13 +181,28 @@ class _LoginScreenState extends State<LoginScreen>
                         margin: const EdgeInsets.only(bottom: 16),
                         child: ElevatedButton.icon(
                           onPressed: () {
-                            Navigator.pushReplacementNamed(context, '/dashboard');
+                            Navigator.pushReplacementNamed(
+                              context,
+                              '/dashboard',
+                            );
                           },
-                          icon: const Icon(Icons.developer_mode, color: Colors.white),
-                          label: const Text('DEV LOGIN', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                          icon: const Icon(
+                            Icons.developer_mode,
+                            color: Colors.white,
+                          ),
+                          label: const Text(
+                            'DEV LOGIN',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.deepOrange,
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
                           ),
                         ),
                       ),
@@ -307,6 +322,7 @@ class _LoginScreenState extends State<LoginScreen>
               isDark: isDark,
               obscureText: _obscurePassword,
               suffixIcon: IconButton(
+                tooltip: _obscurePassword ? 'Show password' : 'Hide password',
                 icon: Icon(
                   _obscurePassword
                       ? Icons.visibility_outlined
@@ -452,7 +468,11 @@ class _LoginScreenState extends State<LoginScreen>
           onPressed: () {
             Navigator.pushReplacementNamed(context, '/dashboard');
           },
-          icon: const Icon(Icons.developer_mode, size: 16, color: Colors.orange),
+          icon: const Icon(
+            Icons.developer_mode,
+            size: 16,
+            color: Colors.orange,
+          ),
           label: const Text(
             'Dev Login (Skip Auth)',
             style: TextStyle(
