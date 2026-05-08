@@ -1,0 +1,4 @@
+## 2024-05-08 - [Hardcoded Supabase Credentials in Production Files]
+**Vulnerability:** Found multiple hardcoded Supabase URLs and Anon Keys directly within the Dart files (e.g., `lib/screens/support_monitor_screen.dart`, `lib/screens/agent_management_screen.dart`, and `lib/services/services.dart`). Some were explicitly marked as "HARDCODED CREDENTIALS FOR DEBUGGING".
+**Learning:** Hardcoded secrets present a critical vulnerability, as any individual with read access to the source code can bypass authentication or exfiltrate databases. This existed because quick debugging configurations were accidentally left in production code.
+**Prevention:** Always load sensitive credentials using environment variables, such as via the `flutter_dotenv` package (`dotenv.env['SECRET']`), ensuring actual keys remain securely in a local, un-committed `.env` file or environment secrets.
