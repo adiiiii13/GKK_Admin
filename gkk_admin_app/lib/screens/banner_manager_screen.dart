@@ -37,7 +37,7 @@ class _BannerManagerScreenState extends State<BannerManagerScreen> {
           .from('carousel_cards')
           .select()
           .order('order_position', ascending: true);
-      
+
       setState(() {
         _banners = List<Map<String, dynamic>>.from(response);
         _isLoading = false;
@@ -253,7 +253,7 @@ class _BannerManagerScreenState extends State<BannerManagerScreen> {
 
   Widget _buildBannerCard(Map<String, dynamic> banner, bool isDark) {
     final isActive = banner['is_active'] ?? true;
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -277,10 +277,7 @@ class _BannerManagerScreenState extends State<BannerManagerScreen> {
               width: double.infinity,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [
-                    const Color(0xFF2da832),
-                    const Color(0xFF4DBF55),
-                  ],
+                  colors: [const Color(0xFF2da832), const Color(0xFF4DBF55)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -324,7 +321,8 @@ class _BannerManagerScreenState extends State<BannerManagerScreen> {
                       ],
                     ),
                   ),
-                  if (banner['image_url'] != null && banner['image_url'].isNotEmpty)
+                  if (banner['image_url'] != null &&
+                      banner['image_url'].isNotEmpty)
                     Positioned(
                       right: -20,
                       bottom: -20,
@@ -383,17 +381,14 @@ class _BannerManagerScreenState extends State<BannerManagerScreen> {
               children: [
                 // Status Toggle
                 GestureDetector(
-                  onTap: () => _toggleBannerStatus(
-                    banner['id'],
-                    isActive,
-                  ),
+                  onTap: () => _toggleBannerStatus(banner['id'], isActive),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 12,
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: isActive 
+                      color: isActive
                           ? Colors.green.withValues(alpha: 0.1)
                           : Colors.red.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
@@ -424,7 +419,8 @@ class _BannerManagerScreenState extends State<BannerManagerScreen> {
                 ),
                 const Spacer(),
                 // Click URL indicator
-                if (banner['click_url'] != null && banner['click_url'].isNotEmpty)
+                if (banner['click_url'] != null &&
+                    banner['click_url'].isNotEmpty)
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 8,
@@ -452,6 +448,7 @@ class _BannerManagerScreenState extends State<BannerManagerScreen> {
                 const SizedBox(width: 8),
                 // Edit Button
                 IconButton(
+                  tooltip: 'Edit Banner',
                   icon: Icon(
                     Icons.edit,
                     color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
@@ -460,6 +457,7 @@ class _BannerManagerScreenState extends State<BannerManagerScreen> {
                 ),
                 // Delete Button
                 IconButton(
+                  tooltip: 'Delete Banner',
                   icon: Icon(Icons.delete, color: Colors.red.shade400),
                   onPressed: () => _deleteBanner(banner['id']),
                 ),
@@ -477,11 +475,8 @@ class BannerEditorDialog extends StatefulWidget {
   final Map<String, dynamic>? banner;
   final VoidCallback onSave;
 
-  const BannerEditorDialog({
-    Key? key,
-    this.banner,
-    required this.onSave,
-  }) : super(key: key);
+  const BannerEditorDialog({Key? key, this.banner, required this.onSave})
+    : super(key: key);
 
   @override
   State<BannerEditorDialog> createState() => _BannerEditorDialogState();
@@ -508,7 +503,10 @@ class _BannerEditorDialogState extends State<BannerEditorDialog> {
   Future<void> _pickImage() async {
     try {
       final picker = ImagePicker();
-      final picked = await picker.pickImage(source: ImageSource.gallery, maxWidth: 1024);
+      final picked = await picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1024,
+      );
       if (picked != null) {
         final bytes = await picked.readAsBytes();
         setState(() {
@@ -520,22 +518,28 @@ class _BannerEditorDialogState extends State<BannerEditorDialog> {
     } catch (e) {
       debugPrint('Image pick error: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to pick image'), backgroundColor: Colors.red),
+        const SnackBar(
+          content: Text('Failed to pick image'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
 
   Future<String?> _uploadImage() async {
     if (_selectedImageBytes == null) return null;
-    
+
     setState(() => _isUploading = true);
     try {
       // Using notification-images bucket for simplicity as requested by user
-      final fileName = 'banners/${DateTime.now().millisecondsSinceEpoch}_$_selectedImageName';
-      
-      final storage = Supabase.instance.client.storage.from('notification-images');
+      final fileName =
+          'banners/${DateTime.now().millisecondsSinceEpoch}_$_selectedImageName';
+
+      final storage = Supabase.instance.client.storage.from(
+        'notification-images',
+      );
       await storage.uploadBinary(fileName, _selectedImageBytes!);
-      
+
       return storage.getPublicUrl(fileName);
     } catch (e) {
       debugPrint('Upload error: $e');
@@ -569,21 +573,54 @@ class _BannerEditorDialogState extends State<BannerEditorDialog> {
 
   // Template options with names, ids and icons
   final List<Map<String, dynamic>> _templateOptions = [
-    {'id': 'classic', 'name': 'Classic', 'icon': Icons.view_carousel, 'desc': 'Text left, round image right'},
-    {'id': 'full_image', 'name': 'Full Image', 'icon': Icons.image, 'desc': 'Background image with overlay'},
-    {'id': 'split_view', 'name': 'Split View', 'icon': Icons.view_sidebar, 'desc': '50/50 split layout'},
-    {'id': 'center_focus', 'name': 'Center Focus', 'icon': Icons.center_focus_strong, 'desc': 'Centered text, image bg'},
-    {'id': 'stacked', 'name': 'Stacked', 'icon': Icons.view_agenda, 'desc': 'Image top, text bottom'},
+    {
+      'id': 'classic',
+      'name': 'Classic',
+      'icon': Icons.view_carousel,
+      'desc': 'Text left, round image right',
+    },
+    {
+      'id': 'full_image',
+      'name': 'Full Image',
+      'icon': Icons.image,
+      'desc': 'Background image with overlay',
+    },
+    {
+      'id': 'split_view',
+      'name': 'Split View',
+      'icon': Icons.view_sidebar,
+      'desc': '50/50 split layout',
+    },
+    {
+      'id': 'center_focus',
+      'name': 'Center Focus',
+      'icon': Icons.center_focus_strong,
+      'desc': 'Centered text, image bg',
+    },
+    {
+      'id': 'stacked',
+      'name': 'Stacked',
+      'icon': Icons.view_agenda,
+      'desc': 'Image top, text bottom',
+    },
   ];
 
   @override
   void initState() {
     super.initState();
     _tagController = TextEditingController(text: widget.banner?['tag'] ?? '');
-    _titleController = TextEditingController(text: widget.banner?['title'] ?? '');
-    _subtitleController = TextEditingController(text: widget.banner?['subtitle'] ?? '');
-    _imageUrlController = TextEditingController(text: widget.banner?['image_url'] ?? '');
-    _clickUrlController = TextEditingController(text: widget.banner?['click_url'] ?? '');
+    _titleController = TextEditingController(
+      text: widget.banner?['title'] ?? '',
+    );
+    _subtitleController = TextEditingController(
+      text: widget.banner?['subtitle'] ?? '',
+    );
+    _imageUrlController = TextEditingController(
+      text: widget.banner?['image_url'] ?? '',
+    );
+    _clickUrlController = TextEditingController(
+      text: widget.banner?['click_url'] ?? '',
+    );
     _selectedColor = widget.banner?['badge_color'] ?? '#FF9800';
     _selectedBgColor = widget.banner?['background_color'] ?? '#FFFFFF';
     _selectedTemplate = widget.banner?['template_style'] ?? 'classic';
@@ -612,7 +649,7 @@ class _BannerEditorDialogState extends State<BannerEditorDialog> {
 
     try {
       final mainDb = context.read<MainDatabaseService>();
-      
+
       // Upload image if selected
       String imageUrl = _imageUrlController.text.trim();
       if (_selectedImageBytes != null) {
@@ -651,21 +688,25 @@ class _BannerEditorDialogState extends State<BannerEditorDialog> {
             .select('order_position')
             .order('order_position', ascending: false)
             .limit(1);
-        
-        final maxOrder = existing.isNotEmpty ? (existing[0]['order_position'] ?? 0) : 0;
-        
+
+        final maxOrder = existing.isNotEmpty
+            ? (existing[0]['order_position'] ?? 0)
+            : 0;
+
         bannerData['order_position'] = maxOrder + 1;
         bannerData['created_at'] = DateTime.now().toIso8601String();
-        
+
         await mainDb.client.from('carousel_cards').insert(bannerData);
       }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(widget.banner != null 
-                ? 'Banner updated successfully'
-                : 'Banner created successfully'),
+            content: Text(
+              widget.banner != null
+                  ? 'Banner updated successfully'
+                  : 'Banner created successfully',
+            ),
             backgroundColor: Colors.green,
           ),
         );
@@ -759,7 +800,8 @@ class _BannerEditorDialogState extends State<BannerEditorDialog> {
                         icon: Icons.title,
                         isDark: isDark,
                         maxLines: 2,
-                        validator: (v) => v?.isEmpty == true ? 'Title is required' : null,
+                        validator: (v) =>
+                            v?.isEmpty == true ? 'Title is required' : null,
                       ),
                       const SizedBox(height: 16),
                       _buildTextField(
@@ -803,24 +845,29 @@ class _BannerEditorDialogState extends State<BannerEditorDialog> {
                                     _selectedImageName = null;
                                   });
                                 },
-                                icon: const Icon(Icons.close, color: Colors.white),
-                                style: IconButton.styleFrom(backgroundColor: Colors.black54),
+                                icon: const Icon(
+                                  Icons.close,
+                                  color: Colors.white,
+                                ),
+                                style: IconButton.styleFrom(
+                                  backgroundColor: Colors.black54,
+                                ),
                               ),
                             ),
                           ],
                         )
                       else if (_imageUrlController.text.isNotEmpty)
-                         ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Image.network(
-                              _imageUrlController.text,
-                              height: 150,
-                              width: double.infinity,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_,__,___) => const SizedBox(),
-                            ),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.network(
+                            _imageUrlController.text,
+                            height: 150,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => const SizedBox(),
                           ),
-                      
+                        ),
+
                       const SizedBox(height: 8),
                       Row(
                         children: [
@@ -836,14 +883,26 @@ class _BannerEditorDialogState extends State<BannerEditorDialog> {
                           const SizedBox(width: 8),
                           ElevatedButton.icon(
                             onPressed: _isUploading ? null : _pickImage,
-                            icon: _isUploading 
-                                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) 
+                            icon: _isUploading
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
                                 : const Icon(Icons.upload_file),
-                            label: Text(_isUploading ? 'Uploading...' : 'Upload'),
+                            label: Text(
+                              _isUploading ? 'Uploading...' : 'Upload',
+                            ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF2da832),
                               foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 16,
+                              ),
                             ),
                           ),
                         ],
@@ -873,7 +932,9 @@ class _BannerEditorDialogState extends State<BannerEditorDialog> {
                         children: _colorOptions.map((option) {
                           final isSelected = _selectedColor == option['color'];
                           return GestureDetector(
-                            onTap: () => setState(() => _selectedColor = option['color']),
+                            onTap: () => setState(
+                              () => _selectedColor = option['color'],
+                            ),
                             child: Container(
                               width: 40,
                               height: 40,
@@ -881,21 +942,28 @@ class _BannerEditorDialogState extends State<BannerEditorDialog> {
                                 color: _hexToColor(option['color']),
                                 shape: BoxShape.circle,
                                 border: Border.all(
-                                  color: isSelected ? Colors.white : Colors.transparent,
+                                  color: isSelected
+                                      ? Colors.white
+                                      : Colors.transparent,
                                   width: 3,
                                 ),
                                 boxShadow: isSelected
                                     ? [
                                         BoxShadow(
-                                          color: _hexToColor(option['color'])
-                                              .withValues(alpha: 0.5),
+                                          color: _hexToColor(
+                                            option['color'],
+                                          ).withValues(alpha: 0.5),
                                           blurRadius: 8,
                                         ),
                                       ]
                                     : null,
                               ),
                               child: isSelected
-                                  ? const Icon(Icons.check, color: Colors.white, size: 20)
+                                  ? const Icon(
+                                      Icons.check,
+                                      color: Colors.white,
+                                      size: 20,
+                                    )
                                   : null,
                             ),
                           );
@@ -923,10 +991,13 @@ class _BannerEditorDialogState extends State<BannerEditorDialog> {
                         spacing: 8,
                         runSpacing: 8,
                         children: _bgColorOptions.map((option) {
-                          final isSelected = _selectedBgColor == option['color'];
+                          final isSelected =
+                              _selectedBgColor == option['color'];
                           final isDarkColor = option['color'] == '#1E1E1E';
                           return GestureDetector(
-                            onTap: () => setState(() => _selectedBgColor = option['color']),
+                            onTap: () => setState(
+                              () => _selectedBgColor = option['color'],
+                            ),
                             child: Container(
                               width: 40,
                               height: 40,
@@ -934,24 +1005,32 @@ class _BannerEditorDialogState extends State<BannerEditorDialog> {
                                 color: _hexToColor(option['color']),
                                 shape: BoxShape.circle,
                                 border: Border.all(
-                                  color: isSelected 
-                                      ? (isDarkColor ? Colors.white : const Color(0xFF2da832))
+                                  color: isSelected
+                                      ? (isDarkColor
+                                            ? Colors.white
+                                            : const Color(0xFF2da832))
                                       : Colors.grey.shade300,
                                   width: isSelected ? 3 : 1,
                                 ),
                                 boxShadow: isSelected
                                     ? [
                                         BoxShadow(
-                                          color: const Color(0xFF2da832).withValues(alpha: 0.3),
+                                          color: const Color(
+                                            0xFF2da832,
+                                          ).withValues(alpha: 0.3),
                                           blurRadius: 8,
                                         ),
                                       ]
                                     : null,
                               ),
                               child: isSelected
-                                  ? Icon(Icons.check, 
-                                      color: isDarkColor ? Colors.white : const Color(0xFF2da832), 
-                                      size: 20)
+                                  ? Icon(
+                                      Icons.check,
+                                      color: isDarkColor
+                                          ? Colors.white
+                                          : const Color(0xFF2da832),
+                                      size: 20,
+                                    )
                                   : null,
                             ),
                           );
@@ -980,20 +1059,28 @@ class _BannerEditorDialogState extends State<BannerEditorDialog> {
                         child: ListView.separated(
                           scrollDirection: Axis.horizontal,
                           itemCount: _templateOptions.length,
-                          separatorBuilder: (_, __) => const SizedBox(width: 12),
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(width: 12),
                           itemBuilder: (context, index) {
                             final template = _templateOptions[index];
-                            final isSelected = _selectedTemplate == template['id'];
+                            final isSelected =
+                                _selectedTemplate == template['id'];
                             return GestureDetector(
-                              onTap: () => setState(() => _selectedTemplate = template['id']),
+                              onTap: () => setState(
+                                () => _selectedTemplate = template['id'],
+                              ),
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 200),
                                 width: 100,
                                 padding: const EdgeInsets.all(10),
                                 decoration: BoxDecoration(
                                   color: isSelected
-                                      ? const Color(0xFF2da832).withValues(alpha: 0.1)
-                                      : (isDark ? Colors.grey.shade800 : Colors.grey.shade100),
+                                      ? const Color(
+                                          0xFF2da832,
+                                        ).withValues(alpha: 0.1)
+                                      : (isDark
+                                            ? Colors.grey.shade800
+                                            : Colors.grey.shade100),
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
                                     color: isSelected
@@ -1010,14 +1097,18 @@ class _BannerEditorDialogState extends State<BannerEditorDialog> {
                                       size: 28,
                                       color: isSelected
                                           ? const Color(0xFF2da832)
-                                          : (isDark ? Colors.grey.shade400 : Colors.grey.shade600),
+                                          : (isDark
+                                                ? Colors.grey.shade400
+                                                : Colors.grey.shade600),
                                     ),
                                     const SizedBox(height: 6),
                                     Text(
                                       template['name'],
                                       style: TextStyle(
                                         fontSize: 11,
-                                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                        fontWeight: isSelected
+                                            ? FontWeight.bold
+                                            : FontWeight.normal,
                                         color: isSelected
                                             ? const Color(0xFF2da832)
                                             : AppTheme.getTextColor(isDark),
@@ -1147,10 +1238,7 @@ class _BannerEditorDialogState extends State<BannerEditorDialog> {
         hintStyle: TextStyle(
           color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
         ),
-        helperStyle: TextStyle(
-          color: Colors.blue.shade400,
-          fontSize: 11,
-        ),
+        helperStyle: TextStyle(color: Colors.blue.shade400, fontSize: 11),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
