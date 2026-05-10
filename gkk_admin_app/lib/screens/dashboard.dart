@@ -411,6 +411,7 @@ class _DashboardScreenState extends State<DashboardScreen>
         Builder(
           builder: (buttonContext) {
             return IconButton(
+              tooltip: 'Toggle Theme',
               icon: Icon(
                 isDark ? Icons.light_mode : Icons.dark_mode,
                 color: const Color(0xFF2da832),
@@ -426,6 +427,7 @@ class _DashboardScreenState extends State<DashboardScreen>
           },
         ),
         IconButton(
+          tooltip: 'Logout',
           icon: const Icon(Icons.logout, color: Color(0xFFE63946)),
           onPressed: _logout,
         ),
@@ -978,6 +980,7 @@ class ProfileAndServicesDelegate extends SliverPersistentHeaderDelegate {
                                       ),
                                     ),
                                     IconButton(
+                                      tooltip: 'Edit Profile',
                                       icon: Icon(
                                         Icons.edit,
                                         color: isDark
