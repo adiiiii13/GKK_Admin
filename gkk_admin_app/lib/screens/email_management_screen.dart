@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../utils/theme_constants.dart';
 import '../services/services.dart';
 import 'package:provider/provider.dart';
@@ -12,9 +13,10 @@ class EmailManagementScreen extends StatefulWidget {
   State<EmailManagementScreen> createState() => _EmailManagementScreenState();
 }
 
-class _EmailManagementScreenState extends State<EmailManagementScreen> with SingleTickerProviderStateMixin {
+class _EmailManagementScreenState extends State<EmailManagementScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  
+
   List<Map<String, dynamic>> _emailLogs = [];
   bool _isLoading = true;
   bool _isSending = false;
@@ -49,7 +51,7 @@ class _EmailManagementScreenState extends State<EmailManagementScreen> with Sing
           .select()
           .order('sent_at', ascending: false)
           .limit(50);
-      
+
       setState(() {
         _emailLogs = List<Map<String, dynamic>>.from(logsResponse);
         _isLoading = false;
@@ -77,34 +79,48 @@ class _EmailManagementScreenState extends State<EmailManagementScreen> with Sing
   }) async {
     try {
       final dbService = context.read<MainDatabaseService>();
-      
+
       // Call Supabase Edge Function
+      final mainUrl =
+          dotenv.env['SUPABASE_MAIN_URL'] ?? 'https://placeholder.supabase.co';
+      final mainAnonKey = dotenv.env['SUPABASE_MAIN_ANON_KEY'] ?? 'placeholder';
+
       final response = await http.post(
-        Uri.parse('https://mwnpwuxrbaousgwgoyco.supabase.co/functions/v1/send-email'),
+        Uri.parse('$mainUrl/functions/v1/send-email'),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer sb_publishable_FKT03rJkxcGCSjXCV2xfeA_bX1jmJD8',
+          'Authorization': 'Bearer $mainAnonKey',
         },
         body: jsonEncode({
           'to': to,
           'subject': subject,
           'body': body,
-          'from': 'GharKaKhana <noreply@adityarouth.site>', // Will use this after domain verified
+          'from':
+              'GharKaKhana <noreply@adityarouth.site>', // Will use this after domain verified
         }),
       );
 
-      debugPrint('Edge Function response: ${response.statusCode} - ${response.body}');
-      
+      debugPrint(
+        'Edge Function response: ${response.statusCode} - ${response.body}',
+      );
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data['success'] == true) {
           return {'success': true, 'message': 'Email sent!'};
         } else {
-          return {'success': false, 'message': data['error'] ?? 'Unknown error'};
+          return {
+            'success': false,
+            'message': data['error'] ?? 'Unknown error',
+          };
         }
       } else {
         final errorBody = jsonDecode(response.body);
-        return {'success': false, 'message': errorBody['error'] ?? 'Server error: ${response.statusCode}'};
+        return {
+          'success': false,
+          'message':
+              errorBody['error'] ?? 'Server error: ${response.statusCode}',
+        };
       }
     } catch (e) {
       debugPrint('Edge Function error: $e');
@@ -136,7 +152,7 @@ class _EmailManagementScreenState extends State<EmailManagementScreen> with Sing
         subject: subject,
         body: body,
       );
-      
+
       final success = result['success'] as bool;
       final message = result['message'] as String;
 
@@ -159,7 +175,7 @@ class _EmailManagementScreenState extends State<EmailManagementScreen> with Sing
       } else {
         _showSnackBar('❌ $message', isError: true);
       }
-      
+
       _loadData();
     } catch (e) {
       _showSnackBar('Failed to send email: $e', isError: true);
@@ -193,10 +209,7 @@ class _EmailManagementScreenState extends State<EmailManagementScreen> with Sing
           ? const Center(child: CircularProgressIndicator())
           : TabBarView(
               controller: _tabController,
-              children: [
-                _buildComposeTab(),
-                _buildHistoryTab(),
-              ],
+              children: [_buildComposeTab(), _buildHistoryTab()],
             ),
     );
   }
@@ -208,13 +221,18 @@ class _EmailManagementScreenState extends State<EmailManagementScreen> with Sing
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Card(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Recipient', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  const Text(
+                    'Recipient',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
                   const SizedBox(height: 12),
                   TextField(
                     controller: _emailController,
@@ -223,7 +241,9 @@ class _EmailManagementScreenState extends State<EmailManagementScreen> with Sing
                       labelText: 'Email Address',
                       hintText: 'Enter recipient email',
                       prefixIcon: const Icon(Icons.email),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
                 ],
@@ -231,15 +251,20 @@ class _EmailManagementScreenState extends State<EmailManagementScreen> with Sing
             ),
           ),
           const SizedBox(height: 16),
-          
+
           Card(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Email Content', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  const Text(
+                    'Email Content',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
                   const SizedBox(height: 12),
                   TextField(
                     controller: _subjectController,
@@ -247,7 +272,9 @@ class _EmailManagementScreenState extends State<EmailManagementScreen> with Sing
                       labelText: 'Subject',
                       hintText: 'Enter email subject',
                       prefixIcon: const Icon(Icons.subject),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -258,7 +285,9 @@ class _EmailManagementScreenState extends State<EmailManagementScreen> with Sing
                       labelText: 'Message Body',
                       hintText: 'Write your email message here...',
                       alignLabelWithHint: true,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
                 ],
@@ -266,7 +295,7 @@ class _EmailManagementScreenState extends State<EmailManagementScreen> with Sing
             ),
           ),
           const SizedBox(height: 24),
-          
+
           SizedBox(
             width: double.infinity,
             height: 56,
@@ -276,14 +305,19 @@ class _EmailManagementScreenState extends State<EmailManagementScreen> with Sing
                   ? const SizedBox(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
                     )
                   : const Icon(Icons.send),
               label: Text(_isSending ? 'Sending...' : 'Send Email'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.primaryGreen,
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
           ),
@@ -300,7 +334,10 @@ class _EmailManagementScreenState extends State<EmailManagementScreen> with Sing
           children: [
             Icon(Icons.email_outlined, size: 80, color: Colors.grey.shade400),
             const SizedBox(height: 16),
-            Text('No emails sent yet', style: TextStyle(fontSize: 18, color: Colors.grey.shade600)),
+            Text(
+              'No emails sent yet',
+              style: TextStyle(fontSize: 18, color: Colors.grey.shade600),
+            ),
           ],
         ),
       );
@@ -314,17 +351,21 @@ class _EmailManagementScreenState extends State<EmailManagementScreen> with Sing
         itemBuilder: (ctx, index) {
           final log = _emailLogs[index];
           final status = (log['status'] ?? 'pending') as String;
-          
+
           return Card(
             margin: const EdgeInsets.only(bottom: 12),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: ListTile(
               contentPadding: const EdgeInsets.all(12),
               leading: Container(
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: status == 'sent' ? Colors.green.shade100 : Colors.red.shade100,
+                  color: status == 'sent'
+                      ? Colors.green.shade100
+                      : Colors.red.shade100,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
@@ -351,7 +392,9 @@ class _EmailManagementScreenState extends State<EmailManagementScreen> with Sing
               trailing: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: status == 'sent' ? Colors.green.shade100 : Colors.red.shade100,
+                  color: status == 'sent'
+                      ? Colors.green.shade100
+                      : Colors.red.shade100,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -359,7 +402,9 @@ class _EmailManagementScreenState extends State<EmailManagementScreen> with Sing
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
-                    color: status == 'sent' ? Colors.green.shade700 : Colors.red.shade700,
+                    color: status == 'sent'
+                        ? Colors.green.shade700
+                        : Colors.red.shade700,
                   ),
                 ),
               ),
