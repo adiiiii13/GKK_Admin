@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:provider/provider.dart';
 import '../../services/services.dart';
 import '../../utils/theme_constants.dart';
@@ -17,6 +18,7 @@ class _DeliveryListScreenState extends State<DeliveryListScreen> {
   String _searchQuery = '';
   bool _isLoading = true;
   List<UserModel> _agents = [];
+  Timer? _debounce;
 
   @override
   void initState() {
@@ -39,6 +41,7 @@ class _DeliveryListScreenState extends State<DeliveryListScreen> {
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _searchController.dispose();
     super.dispose();
   }
@@ -88,7 +91,13 @@ class _DeliveryListScreenState extends State<DeliveryListScreen> {
             ),
             child: TextField(
               controller: _searchController,
-              onChanged: (value) => setState(() => _searchQuery = value),
+              onChanged: (value) {
+                _debounce?.cancel();
+                // ⚡ Bolt: Added debounce to delay state updates by 300ms, preventing jank from excessive rebuilds while typing.
+                _debounce = Timer(const Duration(milliseconds: 300), () {
+                  setState(() => _searchQuery = value);
+                });
+              },
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 hintText: 'Search delivery agents...',
