@@ -60,10 +60,15 @@ class _KitchensListScreenState extends State<KitchensListScreen> {
         foregroundColor: Colors.white,
         elevation: 0,
         actions: [
-          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadKitchens),
+          IconButton(
+            tooltip: 'Refresh',
+            icon: const Icon(Icons.refresh),
+            onPressed: _loadKitchens,
+          ),
           Builder(
             builder: (buttonContext) {
               return IconButton(
+                tooltip: 'Toggle Theme',
                 icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
                 onPressed: () {
                   final box = buttonContext.findRenderObject() as RenderBox;
