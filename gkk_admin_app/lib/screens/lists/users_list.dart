@@ -60,11 +60,16 @@ class _UsersListScreenState extends State<UsersListScreen> {
         foregroundColor: Colors.white,
         elevation: 0,
         actions: [
-          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadUsers),
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _loadUsers,
+            tooltip: 'Refresh',
+          ),
           Builder(
             builder: (buttonContext) {
               return IconButton(
                 icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
+                tooltip: 'Toggle Theme',
                 onPressed: () {
                   final box = buttonContext.findRenderObject() as RenderBox;
                   final position = box.localToGlobal(
