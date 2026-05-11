@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'agent_detail_screen.dart';
 
 class AgentManagementScreen extends StatefulWidget {
@@ -12,10 +13,7 @@ class AgentManagementScreen extends StatefulWidget {
 
 class _AgentManagementScreenState extends State<AgentManagementScreen> {
   // Support DB Client
-  final _supportClient = SupabaseClient(
-    'https://lbdmdeutmuppgsbzrxcy.supabase.co',
-    'sb_publishable_IWjNg9Xc6cFGd9JgEOA3Hg_G-CA32h8',
-  );
+  late final SupabaseClient _supportClient;
 
   List<Map<String, dynamic>> _agents = [];
   bool _isLoading = true;
@@ -23,6 +21,10 @@ class _AgentManagementScreenState extends State<AgentManagementScreen> {
   @override
   void initState() {
     super.initState();
+    _supportClient = SupabaseClient(
+      dotenv.env['SUPPORT_SUPABASE_URL'] ?? 'https://placeholder.supabase.co',
+      dotenv.env['SUPPORT_SUPABASE_ANON_KEY'] ?? 'placeholder',
+    );
     _loadAgents();
   }
 

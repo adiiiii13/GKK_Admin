@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/intl.dart';
 
 class SupportMonitorScreen extends StatefulWidget {
@@ -12,16 +13,16 @@ class SupportMonitorScreen extends StatefulWidget {
 
 class _SupportMonitorScreenState extends State<SupportMonitorScreen> {
   // Dedicated Support DB Client
-  final _supportClient = SupabaseClient(
-    'https://lbdmdeutmuppgsbzrxcy.supabase.co',
-    'sb_publishable_IWjNg9Xc6cFGd9JgEOA3Hg_G-CA32h8',
-  );
+  late final SupabaseClient _supportClient;
 
-  // GKK Basic DB Client (User App's Database for fetching user names)
-  final _userDbClient = SupabaseClient(
-    'https://mwnpwuxrbaousgwgoyco.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13bnB3dXhyYmFvdXNnd2dveWNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5ODU2MzYsImV4cCI6MjA4MzU2MTYzNn0.dTM9rguaiuHbrr59iPUsM5znDzXhOdRXbPQ11yOfZpM',
-  );
+  @override
+  void initState() {
+    super.initState();
+    _supportClient = SupabaseClient(
+      dotenv.env['SUPPORT_SUPABASE_URL'] ?? 'https://placeholder.supabase.co',
+      dotenv.env['SUPPORT_SUPABASE_ANON_KEY'] ?? 'placeholder',
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -139,14 +140,15 @@ class _SupportChatViewerState extends State<SupportChatViewer> {
   String _agentEmail = 'Loading...';
 
   // GKK Basic DB Client (User App's Database)
-  final _userDbClient = SupabaseClient(
-    'https://mwnpwuxrbaousgwgoyco.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13bnB3dXhyYmFvdXNnd2dveWNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5ODU2MzYsImV4cCI6MjA4MzU2MTYzNn0.dTM9rguaiuHbrr59iPUsM5znDzXhOdRXbPQ11yOfZpM',
-  );
+  late final SupabaseClient _userDbClient;
 
   @override
   void initState() {
     super.initState();
+    _userDbClient = SupabaseClient(
+      dotenv.env['SUPABASE_MAIN_URL'] ?? 'https://placeholder.supabase.co',
+      dotenv.env['SUPABASE_MAIN_ANON_KEY'] ?? 'placeholder',
+    );
     _fetchDetails();
   }
 

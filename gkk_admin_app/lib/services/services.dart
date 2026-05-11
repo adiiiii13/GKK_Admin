@@ -100,13 +100,13 @@ class MainDatabaseService extends ChangeNotifier {
   }
 
   Future<void> init() async {
-    // HARDCODED CREDENTIALS FOR DEBUGGING (GKK Basic - SAME KEY AS USER APP)
-    const url = 'https://mwnpwuxrbaousgwgoyco.supabase.co';
-    const key = 'sb_publishable_FKT03rJkxcGCSjXCV2xfeA_bX1jmJD8';
+    // Load credentials from environment variables
+    final url = dotenv.env['SUPABASE_MAIN_URL'] ?? 'https://placeholder.supabase.co';
+    final key = dotenv.env['SUPABASE_MAIN_ANON_KEY'] ?? 'placeholder';
 
     try {
       _client = SupabaseClient(url, key);
-      debugPrint('✅ MainDatabaseService initialized with HARDCODED credentials');
+      debugPrint('✅ MainDatabaseService initialized successfully');
     } catch (e) {
       debugPrint('❌ MainDatabaseService init error: $e');
     }
