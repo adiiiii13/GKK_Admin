@@ -60,11 +60,16 @@ class _DeliveryListScreenState extends State<DeliveryListScreen> {
         foregroundColor: Colors.white,
         elevation: 0,
         actions: [
-          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadAgents),
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _loadAgents,
+            tooltip: 'Refresh',
+          ),
           Builder(
             builder: (buttonContext) {
               return IconButton(
                 icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
+                tooltip: 'Toggle Theme',
                 onPressed: () {
                   final box = buttonContext.findRenderObject() as RenderBox;
                   final position = box.localToGlobal(
