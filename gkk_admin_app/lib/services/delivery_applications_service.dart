@@ -279,18 +279,20 @@ Ghar Ka Khana Admin Team''';
     try {
       if (_supabase == null) return {'pending': 0, 'underReview': 0, 'verified': 0, 'rejected': 0};
 
-      final data = await _supabase!
-          .from('delivery_profiles')
-          .select('verification_status');
+      // Perform fast database-side counting using exact count and head: true
+      final results = await Future.wait([
+        _supabase!.from('delivery_profiles').select('*').eq('verification_status', 'pending').count(CountOption.exact),
+        _supabase!.from('delivery_profiles').select('*').eq('verification_status', 'underReview').count(CountOption.exact),
+        _supabase!.from('delivery_profiles').select('*').eq('verification_status', 'verified').count(CountOption.exact),
+        _supabase!.from('delivery_profiles').select('*').eq('verification_status', 'rejected').count(CountOption.exact),
+      ]);
 
-      final counts = <String, int>{'pending': 0, 'underReview': 0, 'verified': 0, 'rejected': 0};
-      for (final row in data as List) {
-        final status = row['verification_status'] as String?;
-        if (status != null && counts.containsKey(status)) {
-          counts[status] = (counts[status] ?? 0) + 1;
-        }
-      }
-      return counts;
+      return {
+        'pending': results[0].count,
+        'underReview': results[1].count,
+        'verified': results[2].count,
+        'rejected': results[3].count,
+      };
     } catch (e) {
       debugPrint('❌ Get counts error: $e');
       return {'pending': 0, 'underReview': 0, 'verified': 0, 'rejected': 0};
