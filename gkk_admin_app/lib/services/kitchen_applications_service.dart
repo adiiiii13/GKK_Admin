@@ -281,18 +281,18 @@ GharKaKhana Admin Team''';
     try {
       if (_supabase == null) return {'PENDING': 0, 'APPROVED': 0, 'REJECTED': 0};
 
-      final data = await _supabase!
-          .from('kitchen_applications')
-          .select('status');
+      // Perform fast database-side counting using exact count and head: true
+      final results = await Future.wait([
+        _supabase!.from('kitchen_applications').select('*').eq('status', 'PENDING').count(CountOption.exact),
+        _supabase!.from('kitchen_applications').select('*').eq('status', 'APPROVED').count(CountOption.exact),
+        _supabase!.from('kitchen_applications').select('*').eq('status', 'REJECTED').count(CountOption.exact),
+      ]);
 
-      final counts = <String, int>{'PENDING': 0, 'APPROVED': 0, 'REJECTED': 0};
-      for (final row in data as List) {
-        final status = row['status'] as String?;
-        if (status != null && counts.containsKey(status)) {
-          counts[status] = (counts[status] ?? 0) + 1;
-        }
-      }
-      return counts;
+      return {
+        'PENDING': results[0].count,
+        'APPROVED': results[1].count,
+        'REJECTED': results[2].count,
+      };
     } catch (e) {
       debugPrint('❌ Get counts error: $e');
       return {'PENDING': 0, 'APPROVED': 0, 'REJECTED': 0};
