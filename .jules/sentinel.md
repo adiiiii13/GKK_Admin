@@ -1,0 +1,4 @@
+## 2024-05-15 - Hardcoded Offline Credentials Bypass
+**Vulnerability:** A hardcoded `_offlineLogin` fallback in `SupabaseAuthService` allowed anyone using the credentials '9876543210' / 'admin123' to successfully authenticate and assume a local administrator identity ('local_admin'). This occurred if the Supabase instance was uninitialized or failed due to a network error, acting as a complete authentication bypass.
+**Learning:** Development or test credentials left in production code often inadvertently become authentication bypasses, especially when tied to error-handling fallbacks like offline modes.
+**Prevention:** Never leave hardcoded test credentials or offline login bypasses in production authentication flows. If offline login is required, it must validate securely against locally encrypted and cached credentials of previously authenticated users, not hardcoded dummy data.
