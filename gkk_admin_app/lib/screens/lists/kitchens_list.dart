@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../services/services.dart';
@@ -15,8 +16,20 @@ class KitchensListScreen extends StatefulWidget {
 class _KitchensListScreenState extends State<KitchensListScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  Timer? _debounce;
   bool _isLoading = true;
   List<UserModel> _kitchens = [];
+
+  void _onSearchChanged(String query) {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      if (mounted) {
+        setState(() {
+          _searchQuery = query;
+        });
+      }
+    });
+  }
 
   @override
   void initState() {
@@ -39,6 +52,7 @@ class _KitchensListScreenState extends State<KitchensListScreen> {
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _searchController.dispose();
     super.dispose();
   }
@@ -89,7 +103,7 @@ class _KitchensListScreenState extends State<KitchensListScreen> {
             ),
             child: TextField(
               controller: _searchController,
-              onChanged: (value) => setState(() => _searchQuery = value),
+              onChanged: _onSearchChanged,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 hintText: 'Search kitchens...',
