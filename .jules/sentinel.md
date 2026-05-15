@@ -1,0 +1,4 @@
+## 2024-05-15 - Removed Hardcoded Backdoor and API Keys
+**Vulnerability:** A hardcoded credentials backdoor (`9876543210`/`admin123`) existed in `_offlineLogin` within `SupabaseAuthService` to allow testing when the backend was unreachable. Additionally, `MainDatabaseService` contained hardcoded production Supabase API keys for debugging.
+**Learning:** Hardcoded credentials often get forgotten and pushed to production, acting as severe security backdoors or risking data breaches if the source code is compromised or reverse-engineered.
+**Prevention:** Never commit sensitive credentials or implement bypass backdoors in authentication fallbacks. Always use environment variables (e.g., `.env`) for configuration and enforce fail-secure logic (e.g., rejecting access) when downstream services are unavailable.
