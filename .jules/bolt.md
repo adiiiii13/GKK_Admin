@@ -1,0 +1,3 @@
+## 2025-05-16 - Prevent N+1 Query in Agent Management
+**Learning:** In the Supabase Dart SDK, issuing multiple single-row requests in iterative loops can lead to severe O(N) network bottlenecks when rendering lists. Supabase provides robust batch querying capabilities.
+**Action:** Extract relational IDs beforehand and utilize the `.inFilter('id', agentIds)` method to batch load related data in O(1) network requests.
