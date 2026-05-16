@@ -60,10 +60,17 @@ class _DeliveryListScreenState extends State<DeliveryListScreen> {
         foregroundColor: Colors.white,
         elevation: 0,
         actions: [
-          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadAgents),
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _loadAgents,
+            tooltip: 'Refresh delivery fleet',
+          ),
           Builder(
             builder: (buttonContext) {
               return IconButton(
+                tooltip: isDark
+                    ? 'Switch to light mode'
+                    : 'Switch to dark mode',
                 icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
                 onPressed: () {
                   final box = buttonContext.findRenderObject() as RenderBox;
