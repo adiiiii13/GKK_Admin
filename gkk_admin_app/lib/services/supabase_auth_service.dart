@@ -290,19 +290,7 @@ class SupabaseAuthService extends ChangeNotifier {
     String phone,
     String password,
   ) async {
-    if (phone == '9876543210' && password == 'admin123') {
-      _currentAdmin = AdminUser(
-        id: 'local_admin',
-        phone: phone,
-        name: 'Admin',
-        createdAt: DateTime.now(),
-      );
-      await _cacheAdmin(_currentAdmin!);
-      await _prefs.setBool('isLoggedIn', true);
-      notifyListeners();
-      return (success: true, message: 'Login successful (offline mode)');
-    }
-    return (success: false, message: 'Invalid credentials');
+    return (success: false, message: 'Network connection required for login. Offline mode is disabled for security reasons.');
   }
 
   /// Logout
