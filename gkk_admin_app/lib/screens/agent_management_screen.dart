@@ -34,52 +34,55 @@ class _AgentManagementScreenState extends State<AgentManagementScreen> {
           .select('agent_id, agent_email')
           .not('agent_id', 'is', null);
 
-      // Extract unique agents
-      final Map<String, Map<String, dynamic>> uniqueAgents = {};
+      // 1. Gather all unique agent IDs
+      final Set<String> uniqueAgentIds = {};
+      final Map<String, String?> ticketEmails = {}; // agent_id -> agent_email from tickets
+
       for (var ticket in tickets) {
         final agentId = ticket['agent_id'];
-        if (agentId != null && !uniqueAgents.containsKey(agentId)) {
-          var email = ticket['agent_email'];
-          
-          // If no email in ticket, try to get from support_agents table
-          if (email == null) {
-            try {
-              final agentRecord = await _supportClient
-                  .from('support_agents')
-                  .select('email')
-                  .eq('id', agentId)
-                  .maybeSingle();
-              email = agentRecord?['email'];
-            } catch (e) {
-              // Ignore errors
-            }
+        if (agentId != null) {
+          uniqueAgentIds.add(agentId.toString());
+          if (ticket['agent_email'] != null && !ticketEmails.containsKey(agentId.toString())) {
+             ticketEmails[agentId.toString()] = ticket['agent_email'];
           }
-          
-          final displayEmail = email ?? 'ID: ${agentId.toString().substring(0, 8)}...';
-          uniqueAgents[agentId] = {
-            'id': agentId,
-            'email': displayEmail,
-            'name': email?.split('@').first ?? 'Agent ${agentId.toString().substring(0, 6)}',
-          };
         }
       }
 
-      // Also try to get ban status from support_agents
-      for (var agentId in uniqueAgents.keys) {
-        try {
-          final agentData = await _supportClient
-              .from('support_agents')
-              .select('is_banned')
-              .eq('id', agentId)
-              .maybeSingle();
-          if (agentData != null) {
-            uniqueAgents[agentId]!['is_banned'] = agentData['is_banned'] ?? false;
-          } else {
-            uniqueAgents[agentId]!['is_banned'] = false;
-          }
-        } catch (e) {
-          uniqueAgents[agentId]!['is_banned'] = false;
+      // 2. Fetch details for all unique agents in a single query
+      final Map<String, Map<String, dynamic>> agentDetailsMap = {};
+      if (uniqueAgentIds.isNotEmpty) {
+        // ignore: deprecated_member_use
+        final agentsData = await _supportClient
+            .from('support_agents')
+            .select('id, email, is_banned')
+            .inFilter('id', uniqueAgentIds.toList());
+
+        for (var data in agentsData) {
+          agentDetailsMap[data['id'].toString()] = data;
         }
+      }
+
+      // 3. Build the final uniqueAgents map
+      final Map<String, Map<String, dynamic>> uniqueAgents = {};
+
+      for (var agentId in uniqueAgentIds) {
+        final agentData = agentDetailsMap[agentId];
+
+        // Determine email: prefer ticket email if agentData has none, else try agentData email
+        String? email = ticketEmails[agentId];
+        if (email == null && agentData != null) {
+           email = agentData['email'];
+        }
+
+        final displayEmail = email ?? 'ID: ${agentId.substring(0, 8)}...';
+        final isBanned = agentData?['is_banned'] ?? false;
+
+        uniqueAgents[agentId] = {
+          'id': agentId,
+          'email': displayEmail,
+          'name': email?.split('@').first ?? 'Agent ${agentId.substring(0, 6)}',
+          'is_banned': isBanned,
+        };
       }
 
       if (mounted) {
@@ -166,7 +169,7 @@ class _AgentManagementScreenState extends State<AgentManagementScreen> {
           _loadAgents(); // Refresh after returning
         },
         leading: CircleAvatar(
-          backgroundColor: isBanned ? Colors.red.shade50 : const Color(0xFF2DA931).withOpacity(0.1),
+          backgroundColor: isBanned ? Colors.red.shade50 : const Color(0xFF2DA931).withValues(alpha: 0.1),
           child: Icon(
             isBanned ? Icons.block : Icons.support_agent,
             color: isBanned ? Colors.red : const Color(0xFF2DA931),
