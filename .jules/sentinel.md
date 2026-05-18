@@ -1,0 +1,4 @@
+## 2024-05-18 - Hardcoded Credentials in Authentication Fallback
+**Vulnerability:** A hardcoded credentials check (`phone == '9876543210' && password == 'admin123'`) was used in the `_offlineLogin` fallback method of `SupabaseAuthService`.
+**Learning:** During network failures or when the Supabase client wasn't initialized, this fallback method would evaluate the hardcoded credentials, effectively acting as a backdoor authentication bypass. Test credentials should never be implemented within core fallback authentication logic.
+**Prevention:** Remove all hardcoded credentials from the source code. Ensure fallback logic securely fails and reports appropriate errors (e.g., service unavailable) rather than providing alternate authentication routes with pre-defined secrets.
