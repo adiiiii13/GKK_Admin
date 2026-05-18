@@ -69,11 +69,16 @@ class KitchenApplication {
       description: json['description'] ?? '',
       nomineePartner: json['nominee_partner'],
       isVegetarian: json['is_vegetarian'] ?? true,
-      kitchenPhotos: (json['kitchen_photos'] as List<dynamic>?)?.cast<String>() ?? [],
+      kitchenPhotos:
+          (json['kitchen_photos'] as List<dynamic>?)?.cast<String>() ?? [],
       status: json['status'] ?? 'PENDING',
       rejectionReason: json['rejection_reason'],
-      createdAt: DateTime.parse(json['created_at'] ?? DateTime.now().toIso8601String()),
-      reviewedAt: json['reviewed_at'] != null ? DateTime.parse(json['reviewed_at']) : null,
+      createdAt: DateTime.parse(
+        json['created_at'] ?? DateTime.now().toIso8601String(),
+      ),
+      reviewedAt: json['reviewed_at'] != null
+          ? DateTime.parse(json['reviewed_at'])
+          : null,
       reviewedBy: json['reviewed_by'],
     );
   }
@@ -92,7 +97,8 @@ class KitchenApplication {
 /// Kitchen Applications Service for Admin App
 /// Handles fetching, approving, and rejecting kitchen applications
 class KitchenApplicationsService {
-  static final KitchenApplicationsService _instance = KitchenApplicationsService._internal();
+  static final KitchenApplicationsService _instance =
+      KitchenApplicationsService._internal();
   factory KitchenApplicationsService() => _instance;
   KitchenApplicationsService._internal();
 
@@ -130,7 +136,7 @@ class KitchenApplicationsService {
       }
 
       var query = _supabase!.from('kitchen_applications').select();
-      
+
       if (status != null && status != 'ALL') {
         query = query.eq('status', status);
       }
@@ -225,8 +231,10 @@ class KitchenApplicationsService {
     required String kitchenName,
   }) async {
     try {
-      final subject = 'Congratulations! Your Kitchen "$kitchenName" is Approved - Ghar Ka Khana';
-      final body = '''Dear $ownerName,
+      final subject =
+          'Congratulations! Your Kitchen "$kitchenName" is Approved - Ghar Ka Khana';
+      final body =
+          '''Dear $ownerName,
 
 Great news! Your kitchen application for "$kitchenName" has been approved by our admin team.
 
@@ -247,16 +255,15 @@ Best regards,
 GharKaKhana Admin Team''';
 
       final response = await http.post(
-        Uri.parse('https://yvbjnuobnxekgibfqsmq.supabase.co/functions/v1/send-email'),
+        Uri.parse(
+          'https://yvbjnuobnxekgibfqsmq.supabase.co/functions/v1/send-email',
+        ),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl2YmpudW9ibnhla2dpYmZxc21xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzOTY1NzIsImV4cCI6MjA5MDk3MjU3Mn0.Hf5zPb8urWQq155fUxF7kQIGFb0NyWphdMyeRI83vgk',
+          'Authorization':
+              'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl2YmpudW9ibnhla2dpYmZxc21xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzOTY1NzIsImV4cCI6MjA5MDk3MjU3Mn0.Hf5zPb8urWQq155fUxF7kQIGFb0NyWphdMyeRI83vgk',
         },
-        body: jsonEncode({
-          'to': email,
-          'subject': subject,
-          'body': body,
-        }),
+        body: jsonEncode({'to': email, 'subject': subject, 'body': body}),
       );
 
       if (response.statusCode == 200) {
@@ -265,10 +272,18 @@ GharKaKhana Admin Team''';
           debugPrint('Approval email sent to $email');
           return (success: true, message: 'Approval email sent to $email');
         }
-        return (success: false, message: (responseData['error'] ?? 'Email send failed').toString());
+        return (
+          success: false,
+          message: (responseData['error'] ?? 'Email send failed').toString(),
+        );
       } else {
-        debugPrint('Email send failed: ${response.statusCode} ${response.body}');
-        return (success: false, message: 'Email send failed (${response.statusCode})');
+        debugPrint(
+          'Email send failed: ${response.statusCode} ${response.body}',
+        );
+        return (
+          success: false,
+          message: 'Email send failed (${response.statusCode})',
+        );
       }
     } catch (e) {
       debugPrint('Email send error: $e');
@@ -279,20 +294,30 @@ GharKaKhana Admin Team''';
   /// Get counts by status (for dashboard)
   Future<Map<String, int>> getStatusCounts() async {
     try {
-      if (_supabase == null) return {'PENDING': 0, 'APPROVED': 0, 'REJECTED': 0};
+      if (_supabase == null)
+        return {'PENDING': 0, 'APPROVED': 0, 'REJECTED': 0};
 
-      final data = await _supabase!
-          .from('kitchen_applications')
-          .select('status');
+      // ⚡ Bolt: Optimize by using DB-side aggregates (O(1) transfer) instead of fetching all records (O(N) memory & network)
+      final results = await Future.wait([
+        _supabase!
+            .from('kitchen_applications')
+            .count(CountOption.exact)
+            .eq('status', 'PENDING'),
+        _supabase!
+            .from('kitchen_applications')
+            .count(CountOption.exact)
+            .eq('status', 'APPROVED'),
+        _supabase!
+            .from('kitchen_applications')
+            .count(CountOption.exact)
+            .eq('status', 'REJECTED'),
+      ]);
 
-      final counts = <String, int>{'PENDING': 0, 'APPROVED': 0, 'REJECTED': 0};
-      for (final row in data as List) {
-        final status = row['status'] as String?;
-        if (status != null && counts.containsKey(status)) {
-          counts[status] = (counts[status] ?? 0) + 1;
-        }
-      }
-      return counts;
+      return {
+        'PENDING': results[0],
+        'APPROVED': results[1],
+        'REJECTED': results[2],
+      };
     } catch (e) {
       debugPrint('❌ Get counts error: $e');
       return {'PENDING': 0, 'APPROVED': 0, 'REJECTED': 0};
