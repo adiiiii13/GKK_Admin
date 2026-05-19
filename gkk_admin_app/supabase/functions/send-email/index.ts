@@ -25,11 +25,19 @@ async function sendCommand(writer: WritableStreamDefaultWriter<Uint8Array>, comm
 }
 
 async function sendEmailViaSMTP(to: string, subject: string, body: string): Promise<void> {
-  const hostname = "smtp.gmail.com";
-  const port = 465;
-  const username = "gharkakhanasupport@gmail.com";
-  const password = "tfkq jmwv dzoh rxrd";
-  const from = "Ghar Ka Khana <gharkakhanasupport@gmail.com>";
+  const hostname = Deno.env.get("SMTP_HOSTNAME") ?? "smtp.gmail.com";
+  const port = parseInt(Deno.env.get("SMTP_PORT") ?? "465", 10);
+  const username = Deno.env.get("SMTP_USERNAME") ?? "gharkakhanasupport@gmail.com";
+
+  // 🛡️ Sentinel: Never hardcode sensitive credentials like passwords in source code.
+  // Use environment variables managed via Supabase Dashboard/CLI instead.
+  const password = Deno.env.get("SMTP_PASSWORD");
+
+  if (!password) {
+    throw new Error("SMTP_PASSWORD environment variable is not set");
+  }
+
+  const from = Deno.env.get("SMTP_FROM") ?? `Ghar Ka Khana <${username}>`;
 
   // Connect with TLS
   const conn = await Deno.connectTls({ hostname, port });
