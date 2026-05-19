@@ -56,12 +56,16 @@ class _AuthenticationScreenState extends State<AuthenticationScreen>
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
+            tooltip: 'Refresh pending users',
             onPressed: _loadPendingUsers,
           ),
           Builder(
             builder: (buttonContext) {
               return IconButton(
                 icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
+                tooltip: isDark
+                    ? 'Switch to light mode'
+                    : 'Switch to dark mode',
                 onPressed: () {
                   final box = buttonContext.findRenderObject() as RenderBox;
                   final position = box.localToGlobal(
