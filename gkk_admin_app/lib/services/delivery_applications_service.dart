@@ -61,7 +61,8 @@ class DeliveryApplication {
     if (kycDocs != null && kycDocs.isNotEmpty) kyc = kycDocs.first;
 
     Map<String, dynamic>? vehicle;
-    if (vehicleDetails != null && vehicleDetails.isNotEmpty) vehicle = vehicleDetails.first;
+    if (vehicleDetails != null && vehicleDetails.isNotEmpty)
+      vehicle = vehicleDetails.first;
 
     return DeliveryApplication(
       id: json['id'] ?? '',
@@ -84,14 +85,17 @@ class DeliveryApplication {
       vehicleMake: vehicle?['vehicle_make'],
       drivingLicenseUrl: vehicle?['driving_license_url'],
       vehiclePhotoUrl: vehicle?['vehicle_photo_url'],
-      createdAt: DateTime.parse(json['created_at'] ?? DateTime.now().toIso8601String()),
+      createdAt: DateTime.parse(
+        json['created_at'] ?? DateTime.now().toIso8601String(),
+      ),
     );
   }
 }
 
 /// Delivery Applications Service for Admin App
 class DeliveryApplicationsService {
-  static final DeliveryApplicationsService _instance = DeliveryApplicationsService._internal();
+  static final DeliveryApplicationsService _instance =
+      DeliveryApplicationsService._internal();
   factory DeliveryApplicationsService() => _instance;
   DeliveryApplicationsService._internal();
 
@@ -129,14 +133,18 @@ class DeliveryApplicationsService {
       }
 
       // Query delivery profiles and join kyc_documents and vehicle_details
-      var query = _supabase!.from('delivery_profiles').select('*, kyc_documents(*), vehicle_details(*)');
-      
+      var query = _supabase!
+          .from('delivery_profiles')
+          .select('*, kyc_documents(*), vehicle_details(*)');
+
       if (status != null && status != 'ALL') {
         query = query.eq('verification_status', status);
       }
 
       final data = await query.order('created_at', ascending: false);
-      return (data as List).map((e) => DeliveryApplication.fromJson(e)).toList();
+      return (data as List)
+          .map((e) => DeliveryApplication.fromJson(e))
+          .toList();
     } catch (e) {
       debugPrint('❌ Get applications error: $e');
       return [];
@@ -205,8 +213,8 @@ class DeliveryApplicationsService {
       final subject = type == 'APPROVED'
           ? 'Congratulations! You are Approved as a Delivery Agent - Ghar Ka Khana'
           : type == 'REJECTED'
-              ? 'Application Update - Ghar Ka Khana'
-              : 'Account Revoked - Ghar Ka Khana';
+          ? 'Application Update - Ghar Ka Khana'
+          : 'Account Revoked - Ghar Ka Khana';
 
       final body = type == 'APPROVED'
           ? '''Dear $fullName,
@@ -220,7 +228,7 @@ Welcome to the Ghar Ka Khana family!
 Best regards,
 Ghar Ka Khana Admin Team'''
           : type == 'REJECTED'
-              ? '''Dear $fullName,
+          ? '''Dear $fullName,
 
 Thank you for your interest in joining Ghar Ka Khana as a Delivery Agent.
 
@@ -232,7 +240,7 @@ You may reapply after addressing the above concerns.
 
 Best regards,
 Ghar Ka Khana Admin Team'''
-              : '''Dear $fullName,
+          : '''Dear $fullName,
 
 Your Ghar Ka Khana Delivery Agent account has been revoked.
 
@@ -245,16 +253,15 @@ Ghar Ka Khana Admin Team''';
 
       // Using the Kitchen DB Edge Function for sending emails since it's already set up
       final response = await http.post(
-        Uri.parse('https://yvbjnuobnxekgibfqsmq.supabase.co/functions/v1/send-email'),
+        Uri.parse(
+          'https://yvbjnuobnxekgibfqsmq.supabase.co/functions/v1/send-email',
+        ),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl2YmpudW9ibnhla2dpYmZxc21xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzOTY1NzIsImV4cCI6MjA5MDk3MjU3Mn0.Hf5zPb8urWQq155fUxF7kQIGFb0NyWphdMyeRI83vgk',
+          'Authorization':
+              'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl2YmpudW9ibnhla2dpYmZxc21xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzOTY1NzIsImV4cCI6MjA5MDk3MjU3Mn0.Hf5zPb8urWQq155fUxF7kQIGFb0NyWphdMyeRI83vgk',
         },
-        body: jsonEncode({
-          'to': email,
-          'subject': subject,
-          'body': body,
-        }),
+        body: jsonEncode({'to': email, 'subject': subject, 'body': body}),
       );
 
       if (response.statusCode == 200) {
@@ -263,10 +270,18 @@ Ghar Ka Khana Admin Team''';
           debugPrint('Email sent to $email');
           return (success: true, message: 'Email sent to $email');
         }
-        return (success: false, message: (responseData['error'] ?? 'Email send failed').toString());
+        return (
+          success: false,
+          message: (responseData['error'] ?? 'Email send failed').toString(),
+        );
       } else {
-        debugPrint('Email send failed: ${response.statusCode} ${response.body}');
-        return (success: false, message: 'Email send failed (${response.statusCode})');
+        debugPrint(
+          'Email send failed: ${response.statusCode} ${response.body}',
+        );
+        return (
+          success: false,
+          message: 'Email send failed (${response.statusCode})',
+        );
       }
     } catch (e) {
       debugPrint('Email send error: $e');
@@ -277,20 +292,36 @@ Ghar Ka Khana Admin Team''';
   /// Get counts by status
   Future<Map<String, int>> getStatusCounts() async {
     try {
-      if (_supabase == null) return {'pending': 0, 'underReview': 0, 'verified': 0, 'rejected': 0};
+      if (_supabase == null)
+        return {'pending': 0, 'underReview': 0, 'verified': 0, 'rejected': 0};
 
-      final data = await _supabase!
-          .from('delivery_profiles')
-          .select('verification_status');
+      // PERFORMANCE OPTIMIZATION: Instead of fetching all rows and iterating in O(N) locally,
+      // perform database-side aggregates using Supabase count to reduce payload and memory usage.
+      final results = await Future.wait([
+        _supabase!
+            .from('delivery_profiles')
+            .count(CountOption.exact)
+            .eq('verification_status', 'pending'),
+        _supabase!
+            .from('delivery_profiles')
+            .count(CountOption.exact)
+            .eq('verification_status', 'underReview'),
+        _supabase!
+            .from('delivery_profiles')
+            .count(CountOption.exact)
+            .eq('verification_status', 'verified'),
+        _supabase!
+            .from('delivery_profiles')
+            .count(CountOption.exact)
+            .eq('verification_status', 'rejected'),
+      ]);
 
-      final counts = <String, int>{'pending': 0, 'underReview': 0, 'verified': 0, 'rejected': 0};
-      for (final row in data as List) {
-        final status = row['verification_status'] as String?;
-        if (status != null && counts.containsKey(status)) {
-          counts[status] = (counts[status] ?? 0) + 1;
-        }
-      }
-      return counts;
+      return {
+        'pending': results[0],
+        'underReview': results[1],
+        'verified': results[2],
+        'rejected': results[3],
+      };
     } catch (e) {
       debugPrint('❌ Get counts error: $e');
       return {'pending': 0, 'underReview': 0, 'verified': 0, 'rejected': 0};
