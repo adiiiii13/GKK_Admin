@@ -1,0 +1,3 @@
+## 2024-05-19 - Supabase Aggregation Optimization
+**Learning:** In Supabase Dart SDK v2.x, using `.select('*')` to fetch all rows just to count them locally causes significant `O(N)` memory overhead and large network payloads. The correct `O(1)` performance pattern is to use explicit database-side counting with `.count(CountOption.exact)`. Furthermore, executing `.count(...)` directly resolves to a `int`, not a response object, meaning `response.count` pattern throws compilation errors in newer SDK versions.
+**Action:** Use `.count(CountOption.exact)` for aggregations to offload counting to the database, and utilize `Future.wait()` to resolve multiple aggregate counts concurrently without blocking the UI thread.
